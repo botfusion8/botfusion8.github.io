@@ -160,8 +160,12 @@ class _ChatScreenState extends State<ChatScreen> {
                       // Example: String name = snapshot.data!.docs[index]['name'];
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: ListTile(trailing: const Icon(Icons.arrow_forward_ios,size: 15,),
-                          title: Text((snapshot.data!.docs[index]["name"] ?? "")),
+                        child: GestureDetector(onTap: (){
+                          Navigator.pop(context);
+                        },
+                          child: ListTile(trailing: const Icon(Icons.arrow_forward_ios,size: 15,),
+                            title: Text((snapshot.data!.docs[index]["name"] ?? "")),
+                          ),
                         ),
                       );
                     },
