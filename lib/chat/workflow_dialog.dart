@@ -1,8 +1,8 @@
-import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 
 class WorkflowDialog extends StatefulWidget {
   const WorkflowDialog({super.key});
@@ -14,25 +14,28 @@ class WorkflowDialog extends StatefulWidget {
 class _WorkflowDialogState extends State<WorkflowDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
-  File? _imageFile;
+  Uint8List? _imageBytes;
   String? _imageUrl;
 
-
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().getImage(
-        source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
-      _uploadImageToFirebase(_imageFile!);
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
 
+    if (result != null && result.files.single.bytes != null) {
+      final fileBytes = result.files.single.bytes!;
+      final fileName = result.files.single.name;
+
+      setState(() {
+        _imageBytes = fileBytes;
+      });
+
+      _uploadImageToFirebase(fileBytes, fileName);
     }
   }
 
   void addData() async {
-    CollectionReference collectionReference = FirebaseFirestore.instance
-        .collection('workspaces');
+    CollectionReference collectionReference = FirebaseFirestore.instance.collection('workspaces');
 
     await collectionReference.add({
       'name': _nameController.text,
@@ -41,21 +44,14 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
     });
 
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Workspace added successfully'),));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Workspace added successfully')));
   }
 
-  Future<void> _uploadImageToFirebase(File image) async {
+  Future<void> _uploadImageToFirebase(Uint8List fileBytes, String fileName) async {
     try {
-      // Create a unique file name for the image
-      String fileName = DateTime
-          .now()
-          .millisecondsSinceEpoch
-          .toString();
       // Upload the image to Firebase Storage
-      Reference storageReference = FirebaseStorage.instance.ref().child(
-          'images/$fileName');
-      UploadTask uploadTask = storageReference.putFile(image);
+      Reference storageReference = FirebaseStorage.instance.ref().child('images/$fileName');
+      UploadTask uploadTask = storageReference.putData(fileBytes);
       await uploadTask;
       // Retrieve the image URL
       String imageUrl = await storageReference.getDownloadURL();
@@ -67,27 +63,22 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder( // <-- this line is used to make the border rounded
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
-      title: const Text('Add Workflow'),
+      title: const Text('Add Workspace'),
       contentPadding: const EdgeInsets.fromLTRB(15.0, 20.0, 15.0, 0),
-      // Adjust dialog width
       content: SizedBox(
-        width: MediaQuery
-            .of(context)
-            .size
-            .width / 3,
+        width: MediaQuery.of(context).size.width / 3,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Workflow name'),
+              decoration: const InputDecoration(labelText: 'Workspace name'),
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -95,21 +86,19 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
               decoration: const InputDecoration(labelText: 'URL'),
             ),
             const SizedBox(height: 16),
-
-            _imageFile != null ? Column(
+            _imageBytes != null
+                ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Selected Image:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                _imageUrl != null ?
-                Image.network(_imageUrl!,
-                              height: 100,
-                              width: double.infinity,
-                              fit: BoxFit.cover)
+                _imageUrl != null
+                    ? Image.network(_imageUrl!, height: 100, width: double.infinity, fit: BoxFit.cover)
                     : Container(),
                 const SizedBox(height: 16),
               ],
-            ) : const Text('No image selected'),
+            )
+                : const Text('No image selected'),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _pickImage,

@@ -1,6 +1,7 @@
 import 'package:chatbot_text_tool/chat/receiver_message.dart';
 import 'package:chatbot_text_tool/chat/sender_message.dart';
 import 'package:chatbot_text_tool/chat/workflow_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -55,11 +56,17 @@ class _ChatScreenState extends State<ChatScreen> {
             width: MediaQuery.of(context).size.width,
             child: const DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                gradient: LinearGradient(
+                  colors: [Color(0xFFDB91B9), Color(0xFF39D2C0)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Icon(Icons.bug_report, size: 60, color: Colors.white),
                   SizedBox(height: 10),
                   Text(
                     'ChatTestify',
@@ -68,17 +75,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       fontSize: 18,
                     ),
                   ),
-                  Text(
-                    'chattestify@gmail.com',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
-                  ),
                 ],
               ),
             ),
           ),
+
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
@@ -106,7 +107,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Add new workflow',
+                      'Add new workspace',
                       style: TextStyle(
                         color: Colors.black87,
                         fontSize: 15,
@@ -121,19 +122,52 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Expanded(
-            child: Container(
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    "assets/images/nothing_to_show.jpg",
-                    width: 300,
-                    height: 200,
+            child: FutureBuilder<QuerySnapshot>(
+              future: FirebaseFirestore.instance.collection('workspaces').get(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Error fetching data'));
+                }
+                if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
+                  return Container(
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          "assets/images/nothing_to_show.jpg",
+                          width: 300,
+                          height: 200,
+                        ),
+                        const Text(
+                          'Nothing to show',
+                          style: TextStyle(fontSize: 17, color: Colors.black87),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                // If there are data, display your list or other content
+                return Container(
+                  margin: const EdgeInsets.only(top: 10),
+                  child: ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      // Use snapshot.data!.docs[index] to access document data
+                      // Example: String name = snapshot.data!.docs[index]['name'];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: ListTile(trailing: const Icon(Icons.arrow_forward_ios,size: 15,),
+                          title: Text((snapshot.data!.docs[index]["name"] ?? "")),
+                        ),
+                      );
+                    },
                   ),
-                  const Text('Nothing to show',style: TextStyle(fontSize: 17,color: Colors.black87,),)
-                ],
-              ),
+                );
+              },
             ),
           ),
           ListTile(
