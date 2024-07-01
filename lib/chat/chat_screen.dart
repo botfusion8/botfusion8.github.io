@@ -4,6 +4,8 @@ import 'package:chatbot_text_tool/chat/workflow_dialog.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
+
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -90,6 +92,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             child: InkWell(
               onTap: () {
+                Navigator.pop(context);
                 showDialog<void>(
                   context: context,
                   builder: (context) {

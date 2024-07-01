@@ -1,16 +1,22 @@
 import 'package:chatbot_text_tool/chat/chat_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-Future<void> main() async {
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
- await Firebase.initializeApp(
-      options: const FirebaseOptions(
-          apiKey: "AIzaSyBImXvC9KNtEyYLizHE4oVIfnrtnEv3dcg",
-          projectId: "apitesttool-b21bf",
-          messagingSenderId: "649900765132",
-          appId: "1:649900765132:web:9f06a7ab44a9a06a71f769",
-      ));
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+        options: const FirebaseOptions(
+      apiKey: "AIzaSyBImXvC9KNtEyYLizHE4oVIfnrtnEv3dcg",
+      projectId: "apitesttool-b21bf",
+      messagingSenderId: "649900765132",
+      appId: "1:649900765132:web:9f06a7ab44a9a06a71f769",
+          databaseURL: "https://apitesttool-b21bf.firebaseio.com", // Update with your database URL
+          storageBucket: "apitesttool-b21bf.appspot.com",
+        ));
+  }
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 

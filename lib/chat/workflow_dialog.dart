@@ -1,5 +1,6 @@
 import 'dart:io';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -14,32 +15,58 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
   File? _imageFile;
+  String? _imageUrl;
+
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+    final pickedFile = await ImagePicker().getImage(
+        source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
       });
+      _uploadImageToFirebase(_imageFile!);
+
     }
   }
 
-  Future<void> _saveWorkflow() async {
-    String name = _nameController.text;
-    String url = _urlController.text;
+  void addData() async {
+    CollectionReference collectionReference = FirebaseFirestore.instance
+        .collection('workspaces');
 
-    // Save data to Firebase
-/*    await _database.push().set({
-      'name': name,
-      'url': url,
-    });*/
+    await collectionReference.add({
+      'name': _nameController.text,
+      'url': _urlController.text,
+      'image': _imageUrl,
+    });
 
-    // Clear controllers
-    _nameController.clear();
-    _urlController.clear();
-
-    // Optionally, you can also clear _imageFile or reset any other state variables
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Workspace added successfully'),));
   }
+
+  Future<void> _uploadImageToFirebase(File image) async {
+    try {
+      // Create a unique file name for the image
+      String fileName = DateTime
+          .now()
+          .millisecondsSinceEpoch
+          .toString();
+      // Upload the image to Firebase Storage
+      Reference storageReference = FirebaseStorage.instance.ref().child(
+          'images/$fileName');
+      UploadTask uploadTask = storageReference.putFile(image);
+      await uploadTask;
+      // Retrieve the image URL
+      String imageUrl = await storageReference.getDownloadURL();
+      setState(() {
+        _imageUrl = imageUrl;
+      });
+    } catch (e) {
+      print('Error uploading image: $e');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +75,13 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
         borderRadius: BorderRadius.circular(12.0),
       ),
       title: const Text('Add Workflow'),
-      contentPadding: const EdgeInsets.fromLTRB(15.0, 20.0, 15.0, 0), // Adjust dialog width
+      contentPadding: const EdgeInsets.fromLTRB(15.0, 20.0, 15.0, 0),
+      // Adjust dialog width
       content: SizedBox(
-        width: MediaQuery.of(context).size.width/3,
+        width: MediaQuery
+            .of(context)
+            .size
+            .width / 3,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -70,7 +101,12 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
               children: [
                 const Text('Selected Image:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                Image.file(_imageFile!, height: 100, width: double.infinity, fit: BoxFit.cover),
+                _imageUrl != null ?
+                Image.network(_imageUrl!,
+                              height: 100,
+                              width: double.infinity,
+                              fit: BoxFit.cover)
+                    : Container(),
                 const SizedBox(height: 16),
               ],
             ) : const Text('No image selected'),
@@ -92,10 +128,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            String name = _nameController.text;
-            String url = _urlController.text;
-            // You can process and save your data here
-            _saveWorkflow();
+            addData();
           },
           child: const Text('Save'),
         ),
