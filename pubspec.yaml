@@ -43,6 +43,10 @@ dependencies:
   file_picker:
   firebase_storage:
   image_picker_for_web:
+  google_sign_in:
+  firebase_auth:
+  shared_preferences:
+
 
 dev_dependencies:
   flutter_test:

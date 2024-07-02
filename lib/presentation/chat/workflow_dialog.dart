@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'package:chatbot_text_tool/service/user_service.dart';
+import 'package:chatbot_text_tool/utils/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -35,16 +37,25 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   }
 
   void addData() async {
+    String name = _nameController.text.trim();
+    String url = _urlController.text.trim();
+
+    if (name.isEmpty || url.isEmpty) {
+      context.showCustomSnackBar('Please provide both name and URL');
+      return;
+    }
+
     CollectionReference collectionReference = FirebaseFirestore.instance.collection('workspaces');
 
     await collectionReference.add({
-      'name': _nameController.text,
-      'url': _urlController.text,
+      'userRef':UserService().getUserReference(),
+      'name': name,
+      'url': url,
       'image': _imageUrl,
     });
 
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Workspace added successfully')));
+    context.showCustomSnackBar('Workspace added successfully');
   }
 
   Future<void> _uploadImageToFirebase(Uint8List fileBytes, String fileName) async {
@@ -69,7 +80,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
-      title: const Text('Add Workspace'),
+      title: const Text('Create Workspace'),
       contentPadding: const EdgeInsets.fromLTRB(15.0, 20.0, 15.0, 0),
       content: SizedBox(
         width: MediaQuery.of(context).size.width / 3,

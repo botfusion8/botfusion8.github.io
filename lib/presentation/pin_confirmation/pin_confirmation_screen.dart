@@ -1,6 +1,7 @@
-import 'package:chatbot_text_tool/chat/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screen_lock/flutter_screen_lock.dart';
+
+import '../chat/chat_screen.dart';
 
 class PinConfirmationScreen extends StatefulWidget {
   const PinConfirmationScreen({super.key});

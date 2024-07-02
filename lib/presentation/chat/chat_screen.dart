@@ -1,8 +1,11 @@
-import 'package:chatbot_text_tool/chat/receiver_message.dart';
-import 'package:chatbot_text_tool/chat/sender_message.dart';
-import 'package:chatbot_text_tool/chat/workflow_dialog.dart';
+import 'package:chatbot_text_tool/models/user.dart';
+import 'package:chatbot_text_tool/presentation/chat/receiver_message.dart';
+import 'package:chatbot_text_tool/presentation/chat/sender_message.dart';
+import 'package:chatbot_text_tool/presentation/chat/workflow_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+import '../../service/shared_pref_service.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -12,6 +15,18 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  UserModel? currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentUser();
+  }
+  void _getCurrentUser() async {
+    currentUser = await SessionManager.getUser();
+    if (currentUser != null) {} else {}
+  }
+
   final List<Map<String, String>> messages = [
     {
       'text': 'Hello! How are you?',
@@ -47,14 +62,75 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.clear();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      drawer: _buildDrawer(),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(10),
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final message = messages[index];
+                final isUser = message['sender'] == _user;
+
+                return isUser
+                    ? SenderMessage(
+                  text: message['text']!,
+                  timestamp: message['timestamp']!,
+                )
+                    : ReceiverMessage(
+                  text: message['text']!,
+                  timestamp: message['timestamp']!,
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      hintText: 'Type a message...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onSubmitted: (value) {
+                      _sendMessage();
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                FloatingActionButton(
+                  onPressed: _sendMessage,
+                  child: const Icon(Icons.send),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildDrawer() {
     return Drawer(
       child: Column(
         // padding: EdgeInsets.zero,
         children: <Widget>[
           SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: const DrawerHeader(
+            width: MediaQuery
+                .of(context)
+                .size
+                .width,
+            child:  const DrawerHeader(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFFDB91B9), Color(0xFF39D2C0)],
@@ -107,7 +183,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Add new workspace',
+                      'Create workspace',
                       style: TextStyle(
                         color: Colors.black87,
                         fontSize: 15,
@@ -156,15 +232,15 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: ListView.builder(
                     itemCount: snapshot.data!.docs.length,
                     itemBuilder: (context, index) {
-                      // Use snapshot.data!.docs[index] to access document data
-                      // Example: String name = snapshot.data!.docs[index]['name'];
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: GestureDetector(onTap: (){
+                        child: GestureDetector(onTap: () {
                           Navigator.pop(context);
                         },
-                          child: ListTile(trailing: const Icon(Icons.arrow_forward_ios,size: 15,),
-                            title: Text((snapshot.data!.docs[index]["name"] ?? "")),
+                          child: ListTile(trailing: const Icon(
+                            Icons.arrow_forward_ios, size: 15,),
+                            title: Text(
+                                (snapshot.data!.docs[index]["name"] ?? "")),
                           ),
                         ),
                       );
@@ -179,66 +255,47 @@ class _ChatScreenState extends State<ChatScreen> {
             title: const Text('Settings'),
             onTap: () {},
           ),
+          ListTile(
+            leading: const Icon(Icons.logout_outlined),
+            title: const Text('Logout'),
+            onTap: _logout,
+          ),
         ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      drawer: _buildDrawer(),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final message = messages[index];
-                final isUser = message['sender'] == _user;
-
-                return isUser
-                    ? SenderMessage(
-                        text: message['text']!,
-                        timestamp: message['timestamp']!,
-                      )
-                    : ReceiverMessage(
-                        text: message['text']!,
-                        timestamp: message['timestamp']!,
-                      );
+  void _logout() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirm Logout"),
+          content: const Text("Are you sure you want to logout?"),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
               },
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: 'Type a message...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    onSubmitted: (value) {
-                      _sendMessage();
-                    },
-                  ),
-                ),
-                const SizedBox(width: 10),
-                FloatingActionButton(
-                  onPressed: _sendMessage,
-                  child: const Icon(Icons.send),
-                ),
-              ],
+            TextButton(
+              child: const Text("Logout"),
+              onPressed: () {
+                // Perform logout actions here
+                // Clear the list of messages
+                setState(() {
+                  SessionManager.clearUser();
+                  messages.clear();
+                });
+                // Navigate to the login page (replace with your login route)
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/login', (Route<dynamic> route) => false);
+              },
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }
