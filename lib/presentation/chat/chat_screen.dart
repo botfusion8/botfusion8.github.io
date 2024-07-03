@@ -4,6 +4,7 @@ import 'package:chatbot_text_tool/presentation/chat/sender_message.dart';
 import 'package:chatbot_text_tool/presentation/chat/workflow_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../service/shared_pref_service.dart';
 
@@ -130,8 +131,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 .of(context)
                 .size
                 .width,
-            child:  const DrawerHeader(
-              decoration: BoxDecoration(
+            child:  DrawerHeader(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFFDB91B9), Color(0xFF39D2C0)],
                   begin: Alignment.topLeft,
@@ -142,13 +143,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.bug_report, size: 60, color: Colors.white),
-                  SizedBox(height: 10),
+                  const Icon(Icons.bug_report, size: 60, color: Colors.white),
+                  const SizedBox(height: 10),
                   Text(
                     'ChatTestify',
-                    style: TextStyle(
+                    style: GoogleFonts.playball(
                       color: Colors.white,
                       fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],

@@ -5,6 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../common/app_logo_horizontal.dart';
+import '../common/password_field.dart';
+
 class SignupScreen extends StatefulWidget {
   @override
   _SignupScreenState createState() => _SignupScreenState();
@@ -91,6 +94,13 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFDB91B9), Color(0xFF39D2C0)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         alignment: Alignment.center,
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
@@ -100,13 +110,25 @@ class _SignupScreenState extends State<SignupScreen> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
-                color: Colors.grey.withAlpha(20)),
-            height: MediaQuery.of(context).size.height / 1.3,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.8),
+                    spreadRadius: 3,
+                    blurRadius: 7,
+                    offset: const Offset(0, 1), // changes position of shadow
+                  ),
+                ]),
+            height: MediaQuery.of(context).size.height / 1.1,
             width: MediaQuery.of(context).size.width / 3,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const AppLogoHorizontal(),
+                const SizedBox(
+                  height: 25,
+                ),
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -120,7 +142,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 const SizedBox(
-                  height: 30,
+                  height: 20,
                 ),
                 TextFormField(
                   controller: _nameController,
@@ -157,41 +179,33 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                TextFormField(
+                PasswordField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Password',
-                    hintText: 'Enter password',
-                  ),
+                  labelText: 'Password',
+                  hintText: 'Enter password',
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Please enter your password';
                     }
                     return null;
                   },
-                  obscureText: true,
                 ),
                 const SizedBox(
                   height: 10,
                 ),
-                TextFormField(
+                PasswordField(
                   controller: _confirmPasswordController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Confirm password',
-                    hintText: 'Enter confirm password',
-                  ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please confirm your password';
+                  labelText: 'Confirm password',
+                  hintText: 'Enter confirm password',
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please confirm your password';
+                      }
+                      return null;
                     }
-                    return null;
-                  },
-                  obscureText: true,
                 ),
                 Container(
-                  margin: const EdgeInsets.only(top: 40),
+                  margin: const EdgeInsets.only(top: 25),
                   child: InkWell(
                     onTap: _signUp,
                     child: Container(
@@ -199,10 +213,10 @@ class _SignupScreenState extends State<SignupScreen> {
                       alignment: Alignment.center,
                       width: 200,
                       decoration: BoxDecoration(
-                        color: Color(0xFF39D2C0),
+                        color: const Color(0xFF39D2C0),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
+                            color: Colors.grey.withOpacity(0.2),
                             spreadRadius: 3,
                             blurRadius: 7,
                             offset: const Offset(
@@ -210,7 +224,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                         ],
                         borderRadius: const BorderRadius.all(
-                          Radius.circular(20),
+                          Radius.circular(10),
                         ),
                       ),
                       padding: const EdgeInsets.all(5),
@@ -222,7 +236,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 const SizedBox(
-                  height: 15,
+                  height: 10,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -246,11 +260,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   ],
                 ),
                 const SizedBox(
-                  height: 15,
+                  height: 25,
                 ),
                 ElevatedButton.icon(
                   onPressed: _signInWithGoogle,
-                  // icon: const Icon(Icons.login, size: 20.0),
                   icon: Image.asset(
                     'assets/images/iv_google.png',
                     height: 20,
