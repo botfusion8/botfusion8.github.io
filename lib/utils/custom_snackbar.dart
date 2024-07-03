@@ -5,7 +5,7 @@ extension SnackBarExtension on BuildContext {
     ScaffoldMessenger.of(this).showSnackBar(
       SnackBar(
         content: Text(message),
-        duration: const Duration(seconds: 3), // Optional: you can customize the duration
+        duration: const Duration(seconds: 3),
       ),
     );
   }

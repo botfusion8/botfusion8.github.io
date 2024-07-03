@@ -1,19 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserModel {
   final String uid;
   final String name;
   final String email;
+  final String? primaryWorkSpace;
 
   UserModel({
     required this.uid,
     required this.name,
     required this.email,
+    this.primaryWorkSpace
   });
-
-  factory UserModel.fromFirebase(UserModel user) {
-    return UserModel(
-      uid: user.uid,
-      name: user.name ?? '',
-      email: user.email ?? '',
-    );
-  }
 }

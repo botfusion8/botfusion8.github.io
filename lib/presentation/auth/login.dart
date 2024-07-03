@@ -1,6 +1,7 @@
 import 'package:chatbot_text_tool/models/user.dart';
 import 'package:chatbot_text_tool/presentation/auth/signup.dart';
 import 'package:chatbot_text_tool/utils/custom_snackbar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -28,22 +29,29 @@ class _LoginScreenState extends State<LoginScreen> {
         return null;
       }
       final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       final UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
+      await FirebaseAuth.instance.signInWithCredential(credential);
 
-      UserModel user = UserModel(
-        uid: userCredential.user!.uid,
-        name: userCredential.user!.displayName ?? '',
-        email: userCredential.user!.email ?? '',
-      );
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .get();
 
-      await SessionManager.saveUser(user);
+      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+
+      await SessionManager.saveUser(UserModel(
+        uid: userCredential.user?.uid ?? '',
+        name: userCredential.user?.displayName ?? '',
+        email: userCredential.user?.email ?? '',
+        primaryWorkSpace:
+        (userData['primaryWorkSpace'] as DocumentReference?)?.id,
+      ));
       return userCredential.user;
     } catch (e) {
       setState(() {
@@ -60,18 +68,25 @@ class _LoginScreenState extends State<LoginScreen> {
         final String password = _passwordController.text;
 
         UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithEmailAndPassword(
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
           password: password,
         );
 
-        UserModel user = UserModel(
-          uid: userCredential.user!.uid,
-          name: userCredential.user!.displayName ?? '',
-          email: userCredential.user!.email ?? '',
-        );
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .get();
 
-        await SessionManager.saveUser(user);
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+
+        await SessionManager.saveUser(UserModel(
+          uid: userCredential.user?.uid ?? '',
+          name: userCredential.user?.displayName ?? '',
+          email: userCredential.user?.email ?? '',
+          primaryWorkSpace:
+              (userData['primaryWorkSpace'] as DocumentReference?)?.id,
+        ));
 
         Navigator.pushReplacement(
           context,
@@ -91,8 +106,14 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Container(
         alignment: Alignment.center,
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
+        height: MediaQuery
+            .of(context)
+            .size
+            .height,
+        width: MediaQuery
+            .of(context)
+            .size
+            .width,
         child: Form(
           key: _formKey,
           child: Container(
@@ -100,8 +121,14 @@ class _LoginScreenState extends State<LoginScreen> {
             decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
                 color: Colors.grey.withAlpha(20)),
-            height: MediaQuery.of(context).size.height / 1.6,
-            width: MediaQuery.of(context).size.width / 3,
+            height: MediaQuery
+                .of(context)
+                .size
+                .height / 1.6,
+            width: MediaQuery
+                .of(context)
+                .size
+                .width / 3,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -196,15 +223,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(fontSize: 13, color: Colors.black87),
                     ),
                     InkWell(
-                      onTap: (){
+                      onTap: () {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => SignupScreen()),
+                          MaterialPageRoute(builder: (context) =>
+                              SignupScreen()),
                         );
                       },
                       child: const Text(
                         " Sign up",
-                        style: TextStyle(fontSize: 13, color: Color(0xff39d2c0),fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 13,
+                            color: Color(0xff39d2c0),
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
