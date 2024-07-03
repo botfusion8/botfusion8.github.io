@@ -3,12 +3,12 @@ import 'package:chatbot_text_tool/presentation/chat/receiver_message.dart';
 import 'package:chatbot_text_tool/presentation/chat/sender_message.dart';
 import 'package:chatbot_text_tool/presentation/chat/workflow_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../service/shared_pref_service.dart';
 import '../../service/user_service.dart';
+import '../common/app_logo_horizontal.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -28,7 +28,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _getCurrentUser() async {
     currentUser = await SessionManager.getUser();
-    if (currentUser != null) {} else {}
+    if (currentUser != null) {
+    } else {}
   }
 
   final List<Map<String, String>> messages = [
@@ -69,18 +70,19 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      drawer: _buildDrawer(),
-      body: FutureBuilder<UserModel?>(
-        future: SessionManager.getUser(),
-        builder: (context, snapshot){
-          return snapshot.data?.primaryWorkSpace?.isNotEmpty == true ? mainBody() : _emptyWorkflowWidget();
-        },
-      )
-    );
+        appBar: AppBar(),
+        drawer: _buildDrawer(),
+        body: FutureBuilder<UserModel?>(
+          future: SessionManager.getUser(),
+          builder: (context, snapshot) {
+            return snapshot.data?.primaryWorkSpace?.isNotEmpty == true
+                ? mainBody()
+                : _emptyWorkflowWidget();
+          },
+        ));
   }
 
-  Widget mainBody(){
+  Widget mainBody() {
     return Column(
       children: [
         Expanded(
@@ -92,13 +94,13 @@ class _ChatScreenState extends State<ChatScreen> {
               final isUser = message['sender'] == _user;
               return isUser
                   ? SenderMessage(
-                text: message['text']!,
-                timestamp: message['timestamp']!,
-              )
+                      text: message['text']!,
+                      timestamp: message['timestamp']!,
+                    )
                   : ReceiverMessage(
-                text: message['text']!,
-                timestamp: message['timestamp']!,
-              );
+                      text: message['text']!,
+                      timestamp: message['timestamp']!,
+                    );
             },
           ),
         ),
@@ -132,40 +134,74 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _emptyWorkflowWidget(){
-    return Container(
-      padding: const EdgeInsets.all(32.0),
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          const Text(
-            'You don\'t have any workflows yet!\n'
-                'Please create one to start testing your Chat bot APIs.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 24.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.blueAccent,
+  Widget _emptyWorkflowWidget() {
+    return Align(
+      alignment: Alignment.center,
+      child: Container(
+        decoration: BoxDecoration(
+            color: const Color(0xFF39D2C0).withAlpha(30),
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
+            border: Border.all(
+              color: Colors.grey.withAlpha(70),
+            )),
+        padding: const EdgeInsets.all(32.0),
+        height: MediaQuery.of(context).size.height / 2,
+        width: MediaQuery.of(context).size.width / 2,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            const AppLogoHorizontal(),
+            const SizedBox(
+              height: 10,
             ),
-          ),
-          const SizedBox(height: 20.0),
-          ElevatedButton(
-            onPressed: () {
-              // Add your onPressed code here!
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent, // background color
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            const Text(
+              'You don\'t have any workflows yet!\n'
+              'Please create one to start testing your Chat bot APIs.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 22.0,
+                color: Colors.black87,
+              ),
             ),
-            child: const Text(
-              'Create First Workspace',
-              style: TextStyle(fontSize: 18.0),
+            const SizedBox(height: 30.0),
+            InkWell(
+              onTap: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (context) {
+                    return const WorkflowDialog();
+                  },
+                );
+              },
+              child: Container(
+                height: 45,
+                alignment: Alignment.center,
+                width: 200,
+                decoration: BoxDecoration(
+                  //0xFF39D2C0
+                  color: const Color(0xFF39D2C0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      spreadRadius: 3,
+                      blurRadius: 7,
+                      offset: const Offset(0, 1), // changes position of shadow
+                    ),
+                  ],
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(10),
+                  ),
+                ),
+                padding: const EdgeInsets.all(5),
+                child: const Text(
+                  'Create first workspace',
+                  style: TextStyle(fontSize: 15, color: Colors.white),
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -177,8 +213,8 @@ class _ChatScreenState extends State<ChatScreen> {
         children: <Widget>[
           SizedBox(
             width: MediaQuery.of(context).size.width,
-            child: const DrawerHeader(
-              decoration: BoxDecoration(
+            child: DrawerHeader(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFFDB91B9), Color(0xFF39D2C0)],
                   begin: Alignment.topLeft,
@@ -195,7 +231,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     'ChatTestify',
                     style: GoogleFonts.playball(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 22,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -306,13 +342,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemCount: filteredDocs.length,
                     itemBuilder: (context, index) {
                       final doc = filteredDocs[index];
-                      print("chatbot value ${doc.reference.id}");
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         decoration: BoxDecoration(
-                          color: currentUser?.primaryWorkSpace == doc.reference.id
-                              ? const Color(0Xff39d2c0).withAlpha(100)
-                              : Colors.transparent,
+                          color:
+                              currentUser?.primaryWorkSpace == doc.reference.id
+                                  ? const Color(0Xff39d2c0).withAlpha(100)
+                                  : Colors.transparent,
                         ),
                         child: GestureDetector(
                           onTap: () async {
@@ -351,7 +387,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
                 );
-
               },
             ),
           ),
