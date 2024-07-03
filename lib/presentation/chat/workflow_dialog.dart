@@ -111,10 +111,36 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
             )
                 : const Text('No image selected'),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: const Text('Select Image'),
+            InkWell(
+              onTap: _pickImage,
+              child: Container(
+                height: 35,
+                alignment: Alignment.center,
+                width: 150,
+                decoration: BoxDecoration(
+                  //0xFF39D2C0
+                  color: const Color(0xFF39D2C0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      spreadRadius: 3,
+                      blurRadius: 7,
+                      offset: const Offset(
+                          0, 1), // changes position of shadow
+                    ),
+                  ],
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(10),
+                  ),
+                ),
+                padding: const EdgeInsets.all(5),
+                child: const Text(
+                  'Select Image',
+                  style: TextStyle(fontSize: 15, color: Colors.white),
+                ),
+              ),
             ),
+
             const SizedBox(height: 32),
           ],
         ),
@@ -126,11 +152,40 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
           },
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
+      /*  ElevatedButton(
           onPressed: () {
             addData();
           },
           child: const Text('Save'),
+        ),*/
+        InkWell(
+          onTap: addData,
+          child: Container(
+            height: 30,
+            alignment: Alignment.center,
+            width: 80,
+            decoration: BoxDecoration(
+              //0xFF39D2C0
+              color: const Color(0xFF39D2C0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  spreadRadius: 3,
+                  blurRadius: 7,
+                  offset: const Offset(
+                      0, 1), // changes position of shadow
+                ),
+              ],
+              borderRadius: const BorderRadius.all(
+                Radius.circular(10),
+              ),
+            ),
+            padding: const EdgeInsets.all(5),
+            child: const Text(
+              'Save',
+              style: TextStyle(fontSize: 15, color: Colors.white),
+            ),
+          ),
         ),
       ],
     );
