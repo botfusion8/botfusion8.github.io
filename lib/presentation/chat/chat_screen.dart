@@ -69,140 +69,163 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(),
-        drawer: _buildDrawer(),
-        body: FutureBuilder<UserModel?>(
-          future: SessionManager.getUser(),
-          builder: (context, snapshot) {
-            return snapshot.data?.primaryWorkSpace?.isNotEmpty == true
-                ? mainBody()
-                : _emptyWorkflowWidget();
-          },
-        ));
+    return FutureBuilder<UserModel?>(
+        future: SessionManager.getUser(),
+        builder: (context, snapshot) {
+          return snapshot.data?.primaryWorkSpace?.isNotEmpty == true
+                      ? mainBody(snapshot.data!.primaryWorkSpace ?? "")
+                      : _emptyWorkflowWidget();
+        }
+    );
   }
 
-  Widget mainBody() {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(10),
-            itemCount: messages.length,
-            itemBuilder: (context, index) {
-              final message = messages[index];
-              final isUser = message['sender'] == _user;
-              return isUser
-                  ? SenderMessage(
-                      text: message['text']!,
-                      timestamp: message['timestamp']!,
-                    )
-                  : ReceiverMessage(
-                      text: message['text']!,
-                      timestamp: message['timestamp']!,
-                    );
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: InputDecoration(
-                    hintText: 'Type a message...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  onSubmitted: (value) {
-                    _sendMessage();
-                  },
+  Widget mainBody(String primaryWorkSpaceID) {
+
+    return FutureBuilder<DocumentSnapshot?>(
+        future: FirebaseFirestore.instance
+            .collection('workspaces')
+            .doc(primaryWorkSpaceID)
+            .get(),
+        builder: (context, snapshot) {
+          final workSpaceName = snapshot.data?["name"] ?? "UnKnown Name";
+          return Scaffold(
+              appBar: AppBar(
+                elevation: 5,
+                centerTitle: true,
+                title: Text(
+                    workSpaceName,
                 ),
               ),
-              const SizedBox(width: 10),
-              FloatingActionButton(
-                onPressed: _sendMessage,
-                child: const Icon(Icons.send),
-              ),
-            ],
-          ),
-        ),
-      ],
+              drawer: _buildDrawer(),
+              body:Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(10),
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        final message = messages[index];
+                        final isUser = message['sender'] == _user;
+                        return isUser
+                            ? SenderMessage(
+                          text: message['text']!,
+                          timestamp: message['timestamp']!,
+                        )
+                            : ReceiverMessage(
+                          text: message['text']!,
+                          timestamp: message['timestamp']!,
+                        );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _controller,
+                            decoration: InputDecoration(
+                              hintText: 'Type a message...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            onSubmitted: (value) {
+                              _sendMessage();
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        FloatingActionButton(
+                          onPressed: _sendMessage,
+                          child: const Icon(Icons.send),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+          );
+        }
     );
   }
 
   Widget _emptyWorkflowWidget() {
-    return Align(
-      alignment: Alignment.center,
-      child: Container(
-        decoration: BoxDecoration(
-            color: const Color(0xFF39D2C0).withAlpha(30),
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-            border: Border.all(
-              color: Colors.grey.withAlpha(70),
-            )),
-        padding: const EdgeInsets.all(32.0),
-        height: MediaQuery.of(context).size.height / 2,
-        width: MediaQuery.of(context).size.width / 2,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            const AppLogoHorizontal(),
-            const SizedBox(
-              height: 10,
-            ),
-            const Text(
-              'You don\'t have any workflows yet!\n'
-              'Please create one to start testing your Chat bot APIs.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 22.0,
-                color: Colors.black87,
+    return  Scaffold(
+      appBar: AppBar(elevation: 5,
+        centerTitle: true
+      ),
+        drawer: _buildDrawer(),
+      body: Align(
+        alignment: Alignment.center,
+        child: Container(
+          decoration: BoxDecoration(
+              color: const Color(0xFF39D2C0).withAlpha(30),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+              border: Border.all(
+                color: Colors.grey.withAlpha(70),
+              )),
+          padding: const EdgeInsets.all(32.0),
+          height: MediaQuery.of(context).size.height / 2,
+          width: MediaQuery.of(context).size.width / 2,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              const AppLogoHorizontal(),
+              const SizedBox(
+                height: 10,
               ),
-            ),
-            const SizedBox(height: 30.0),
-            InkWell(
-              onTap: () {
-                showDialog<void>(
-                  context: context,
-                  builder: (context) {
-                    return const WorkflowDialog();
-                  },
-                );
-              },
-              child: Container(
-                height: 45,
-                alignment: Alignment.center,
-                width: 200,
-                decoration: BoxDecoration(
-                  //0xFF39D2C0
-                  color: const Color(0xFF39D2C0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      spreadRadius: 3,
-                      blurRadius: 7,
-                      offset: const Offset(0, 1), // changes position of shadow
+              const Text(
+                'You don\'t have any workflows yet!\n'
+                    'Please create one to start testing your Chat bot APIs.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 22.0,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 30.0),
+              InkWell(
+                onTap: () {
+                  showDialog<void>(
+                    context: context,
+                    builder: (context) {
+                      return const WorkflowDialog();
+                    },
+                  );
+                },
+                child: Container(
+                  height: 45,
+                  alignment: Alignment.center,
+                  width: 200,
+                  decoration: BoxDecoration(
+                    //0xFF39D2C0
+                    color: const Color(0xFF39D2C0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 3,
+                        blurRadius: 7,
+                        offset: const Offset(0, 1), // changes position of shadow
+                      ),
+                    ],
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(10),
                     ),
-                  ],
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(10),
+                  ),
+                  padding: const EdgeInsets.all(5),
+                  child: const Text(
+                    'Create first workspace',
+                    style: TextStyle(fontSize: 15, color: Colors.white),
                   ),
                 ),
-                padding: const EdgeInsets.all(5),
-                child: const Text(
-                  'Create first workspace',
-                  style: TextStyle(fontSize: 15, color: Colors.white),
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      )
     );
   }
 
@@ -231,7 +254,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     'ChatTestify',
                     style: GoogleFonts.playball(
                       color: Colors.white,
-                      fontSize: 22,
+                      fontSize: 26,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
