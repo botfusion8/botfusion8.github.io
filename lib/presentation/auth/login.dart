@@ -4,10 +4,13 @@ import 'package:chatbot_text_tool/utils/custom_snackbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../service/shared_pref_service.dart';
 import '../chat/chat_screen.dart';
+import '../common/app_logo_horizontal.dart';
+import '../common/password_field.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,14 +32,14 @@ class _LoginScreenState extends State<LoginScreen> {
         return null;
       }
       final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+          await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       final UserCredential userCredential =
-      await FirebaseAuth.instance.signInWithCredential(credential);
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('users')
@@ -105,6 +108,13 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFDB91B9), Color(0xFF39D2C0)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         alignment: Alignment.center,
         height: MediaQuery
             .of(context)
@@ -120,11 +130,19 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
-                color: Colors.grey.withAlpha(20)),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.8),
+                    spreadRadius: 3,
+                    blurRadius: 7,
+                    offset: const Offset(0, 1), // changes position of shadow
+                  ),
+                ]),
             height: MediaQuery
                 .of(context)
                 .size
-                .height / 1.6,
+                .height / 1.2,
             width: MediaQuery
                 .of(context)
                 .size
@@ -133,6 +151,10 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const AppLogoHorizontal(),
+                const SizedBox(
+                  height: 25,
+                ),
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -146,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(
-                  height: 30,
+                  height: 20,
                 ),
                 TextFormField(
                   controller: _emailController,
@@ -166,34 +188,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                TextFormField(
+                PasswordField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Password',
-                    hintText: 'Enter password',
-                  ),
+                  labelText: 'Password',
+                  hintText: 'Enter password',
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Please enter your password';
                     }
                     return null;
                   },
-                  obscureText: true,
                 ),
                 Container(
-                  margin: const EdgeInsets.only(top: 40),
+                  margin: const EdgeInsets.only(top: 25),
                   child: InkWell(
                     onTap: _signInWithEmailAndPassword,
                     child: Container(
-                      height: 40,
+                      height: 45,
                       alignment: Alignment.center,
                       width: 200,
                       decoration: BoxDecoration(
+                        //0xFF39D2C0
                         color: const Color(0xFF39D2C0),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
+                            color: Colors.grey.withOpacity(0.2),
                             spreadRadius: 3,
                             blurRadius: 7,
                             offset: const Offset(
@@ -201,7 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                         borderRadius: const BorderRadius.all(
-                          Radius.circular(20),
+                          Radius.circular(10),
                         ),
                       ),
                       padding: const EdgeInsets.all(5),
@@ -213,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(
-                  height: 15,
+                  height: 10,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -226,13 +245,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       onTap: () {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) =>
-                              SignupScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => SignupScreen()),
                         );
                       },
                       child: const Text(
                         " Sign up",
-                        style: TextStyle(fontSize: 13,
+                        style: TextStyle(
+                            fontSize: 13,
                             color: Color(0xff39d2c0),
                             fontWeight: FontWeight.bold),
                       ),
@@ -240,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
                 const SizedBox(
-                  height: 15,
+                  height: 25,
                 ),
                 ElevatedButton.icon(
                   onPressed: () async {
