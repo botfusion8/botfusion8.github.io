@@ -1,13 +1,17 @@
+import 'package:chatbot_text_tool/utils/timestamp_converter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class SenderMessage extends StatelessWidget {
   final String text;
-  final String timestamp;
+  final Timestamp timestamp;
 
   SenderMessage({required this.text, required this.timestamp});
 
   @override
   Widget build(BuildContext context) {
+    DateTime dateTime = DateTime.now();
+
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
@@ -32,7 +36,7 @@ class SenderMessage extends StatelessWidget {
             ),
             const SizedBox(height: 5),
             Text(
-              timestamp,
+              dateTime.toFormattedTime(timestamp.seconds, timestamp.nanoseconds),
               style: const TextStyle(
                 fontSize: 12,
                 color: Colors.white70,

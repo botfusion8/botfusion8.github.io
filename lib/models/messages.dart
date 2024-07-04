@@ -1,30 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Message {
-  String chatId;
-  String message;
-  Timestamp createdTime;
-  DocumentReference chatSessionRef;
-  String createdBy;
-  bool isBotMessage;
+  final String chatId;
+  final String message;
+  final Timestamp? createdTime; // Make sure it's nullable if null is possible
+  final dynamic chatSessionRef;
+  final dynamic createdBy;
+  final bool isBotMessage;
 
   Message({
     required this.chatId,
     required this.message,
-    required this.createdTime,
+    this.createdTime,
     required this.chatSessionRef,
     required this.createdBy,
     required this.isBotMessage,
   });
 
-  factory Message.fromDocument(DocumentSnapshot doc) {
+  factory Message.fromMap(Map<String, dynamic> map) {
     return Message(
-      chatId: doc['chatId'],
-      message: doc['message'],
-      createdTime: doc['created_time'],
-      chatSessionRef: doc['chatSessionRef'],
-      createdBy: doc['createdBy'],
-      isBotMessage: doc['isBotMessage'],
+      chatId: map['chatId'] ?? '',
+      message: map['message'] ?? '',
+      createdTime: map['createdTime'] ?? null, // Ensure null safety here
+      chatSessionRef: map['chatSessionRef'] ?? null,
+      createdBy: map['createdBy'] ?? null,
+      isBotMessage: map['isBotMessage'] ?? false,
     );
   }
 
@@ -32,7 +32,7 @@ class Message {
     return {
       'chatId': chatId,
       'message': message,
-      'created_time': createdTime,
+      'createdTime': createdTime ?? null, // Ensure null safety here
       'chatSessionRef': chatSessionRef,
       'createdBy': createdBy,
       'isBotMessage': isBotMessage,

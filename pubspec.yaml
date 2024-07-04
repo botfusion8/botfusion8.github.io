@@ -47,6 +47,8 @@ dependencies:
   firebase_auth:
   shared_preferences:
   google_fonts: ^4.0.3
+  intl:
+
 
 
 dev_dependencies:

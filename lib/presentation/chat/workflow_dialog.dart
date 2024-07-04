@@ -48,7 +48,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
     CollectionReference collectionReference = FirebaseFirestore.instance.collection('workspaces');
 
     await collectionReference.add({
-      'userRef':UserService().getUserReference(),
+      'userRef': UserService().getUserReference(),
       'name': name,
       'url': url,
       'image': _imageUrl,
@@ -152,12 +152,6 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
           },
           child: const Text('Cancel'),
         ),
-      /*  ElevatedButton(
-          onPressed: () {
-            addData();
-          },
-          child: const Text('Save'),
-        ),*/
         InkWell(
           onTap: addData,
           child: Container(
