@@ -41,7 +41,7 @@ class _SignupScreenState extends State<SignupScreen> {
             .collection('users')
             .doc(userCredential.user!.uid)
             .set({
-          'name': _nameController.text,
+          'displayName': _nameController.text,
           'email': _emailController.text,
         });
 
@@ -78,7 +78,7 @@ class _SignupScreenState extends State<SignupScreen> {
           .collection('users')
           .doc(userCredential.user!.uid)
           .set({
-        'name': userCredential.user!.displayName,
+        'displayName': userCredential.user!.displayName,
         'email': userCredential.user!.email,
       });
 

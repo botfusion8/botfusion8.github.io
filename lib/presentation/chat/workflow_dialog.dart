@@ -1,10 +1,12 @@
 import 'dart:typed_data';
+import 'package:chatbot_text_tool/presentation/common/color_picker.dart';
 import 'package:chatbot_text_tool/service/user_service.dart';
 import 'package:chatbot_text_tool/utils/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class WorkflowDialog extends StatefulWidget {
   const WorkflowDialog({super.key});
@@ -16,8 +18,15 @@ class WorkflowDialog extends StatefulWidget {
 class _WorkflowDialogState extends State<WorkflowDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
+  Color selectedWorkspaceColor = Colors.grey.withAlpha(70);
   Uint8List? _imageBytes;
   String? _imageUrl;
+
+  void onColorChanged(Color color) {
+    setState(() {
+      selectedWorkspaceColor = color;
+    });
+  }
 
   Future<void> _pickImage() async {
     final result = await FilePicker.platform.pickFiles(
@@ -52,6 +61,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
       'name': name,
       'url': url,
       'image': _imageUrl,
+      'workSpaceColor' : "0x${selectedWorkspaceColor.toHexString()}"
     });
 
     Navigator.pop(context);
@@ -97,6 +107,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
               decoration: const InputDecoration(labelText: 'URL'),
             ),
             const SizedBox(height: 16),
+            WorkspaceColor(onColorChanged: onColorChanged),
             _imageBytes != null
                 ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,8 +119,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
                     : Container(),
                 const SizedBox(height: 16),
               ],
-            )
-                : const Text('No image selected'),
+            ) : const Text('No image selected'),
             const SizedBox(height: 16),
             InkWell(
               onTap: _pickImage,

@@ -85,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         await SessionManager.saveUser(UserModel(
           uid: userCredential.user?.uid ?? '',
-          name: userCredential.user?.displayName ?? '',
+          name: userData['displayName'] ?? '',
           email: userCredential.user?.email ?? '',
           primaryWorkSpace:
               (userData['primaryWorkSpace'] as DocumentReference?)?.id,

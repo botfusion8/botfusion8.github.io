@@ -48,8 +48,8 @@ dependencies:
   shared_preferences:
   google_fonts: ^4.0.3
   intl:
-
-
+  http:
+  flutter_colorpicker:
 
 dev_dependencies:
   flutter_test:
