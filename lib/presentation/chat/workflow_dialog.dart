@@ -13,8 +13,15 @@ class WorkflowDialog extends StatefulWidget {
   String? url;
   String? workspaceColor;
   String? workspaceId;
+  String? tokenHeader;
 
-  WorkflowDialog({super.key,this.name,this.url,this.workspaceColor,this.workspaceId});
+  WorkflowDialog(
+      {super.key,
+      this.name,
+      this.url,
+      this.workspaceColor,
+      this.workspaceId,
+      this.tokenHeader});
 
   @override
   _WorkflowDialogState createState() => _WorkflowDialogState();
@@ -23,6 +30,8 @@ class WorkflowDialog extends StatefulWidget {
 class _WorkflowDialogState extends State<WorkflowDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
+  final TextEditingController _tokenHeader = TextEditingController();
+
   Color selectedWorkspaceColor = Colors.grey.withAlpha(70);
   Uint8List? _imageBytes;
   String? _imageUrl;
@@ -33,13 +42,13 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
     _nameController.text = widget.name ?? "";
     _urlController.text = widget.url ?? "";
 
-    if(widget.workspaceId!.isNotEmpty && widget.url!.isNotEmpty){
+    if (widget.workspaceId!.isNotEmpty && widget.url!.isNotEmpty) {
       _btnText = "Update";
-    }else{
+    } else {
       _btnText = "Save";
     }
 
-    if(widget.workspaceColor != null){
+    if (widget.workspaceColor != null) {
       setState(() {
         selectedWorkspaceColor = Color(int.parse(widget.workspaceColor!));
       });
@@ -79,14 +88,15 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
       return;
     }
 
-    CollectionReference collectionReference = FirebaseFirestore.instance.collection('workspaces');
+    CollectionReference collectionReference =
+        FirebaseFirestore.instance.collection('workspaces');
 
     await collectionReference.add({
       'userRef': UserService().getUserReference(),
       'name': name,
       'url': url,
       'image': _imageUrl,
-      'workSpaceColor' : "0x${selectedWorkspaceColor.toHexString()}"
+      'workSpaceColor': "0x${selectedWorkspaceColor.toHexString()}"
     });
 
     Navigator.pop(context);
@@ -96,30 +106,34 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   void updateData() async {
     String name = _nameController.text.trim();
     String url = _urlController.text.trim();
+    String tokenHeader = _tokenHeader.text.trim();
 
     if (name.isEmpty || url.isEmpty) {
       context.showCustomSnackBar('Please provide both name and URL');
       return;
     }
 
-    CollectionReference collectionReference = FirebaseFirestore.instance.collection('workspaces');
+    CollectionReference collectionReference =
+        FirebaseFirestore.instance.collection('workspaces');
 
     await collectionReference.doc(widget.workspaceId).update({
       'name': name,
       'url': url,
       'image': _imageUrl,
-      'workSpaceColor': "0x${selectedWorkspaceColor.toHexString()}"
+      'workSpaceColor': "0x${selectedWorkspaceColor.toHexString()}",
+      'tokenHeader' : tokenHeader,
     });
 
     Navigator.pop(context);
     context.showCustomSnackBar('Workspace updated successfully');
   }
 
-
-  Future<void> _uploadImageToFirebase(Uint8List fileBytes, String fileName) async {
+  Future<void> _uploadImageToFirebase(
+      Uint8List fileBytes, String fileName) async {
     try {
       // Upload the image to Firebase Storage
-      Reference storageReference = FirebaseStorage.instance.ref().child('images/$fileName');
+      Reference storageReference =
+          FirebaseStorage.instance.ref().child('images/$fileName');
       UploadTask uploadTask = storageReference.putData(fileBytes);
       await uploadTask;
       // Retrieve the image URL
@@ -155,19 +169,31 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
               decoration: const InputDecoration(labelText: 'URL'),
             ),
             const SizedBox(height: 16),
-            WorkspaceColor(onColorChanged: onColorChanged, defaultColor: selectedWorkspaceColor),
+            TextFormField(
+              controller: _tokenHeader,
+              decoration: const InputDecoration(labelText: 'Token Header'),
+            ),
+            const SizedBox(height: 16),
+            WorkspaceColor(
+                onColorChanged: onColorChanged,
+                defaultColor: selectedWorkspaceColor),
             _imageBytes != null
                 ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Selected Image:', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                _imageUrl != null
-                    ? Image.network(_imageUrl!, height: 100, width: double.infinity, fit: BoxFit.cover)
-                    : Container(),
-                const SizedBox(height: 16),
-              ],
-            ) : const Text('No image selected'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Selected Image:',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      _imageUrl != null
+                          ? Image.network(_imageUrl!,
+                              height: 100,
+                              width: double.infinity,
+                              fit: BoxFit.cover)
+                          : Container(),
+                      const SizedBox(height: 16),
+                    ],
+                  )
+                : const Text('No image selected'),
             const SizedBox(height: 16),
             InkWell(
               onTap: _pickImage,
@@ -183,8 +209,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
                       color: Colors.grey.withOpacity(0.2),
                       spreadRadius: 3,
                       blurRadius: 7,
-                      offset: const Offset(
-                          0, 1), // changes position of shadow
+                      offset: const Offset(0, 1), // changes position of shadow
                     ),
                   ],
                   borderRadius: const BorderRadius.all(
@@ -198,7 +223,6 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
                 ),
               ),
             ),
-
             const SizedBox(height: 32),
           ],
         ),
@@ -211,7 +235,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
           child: const Text('Cancel'),
         ),
         InkWell(
-          onTap: widget.workspaceId =="" ? addData : updateData,
+          onTap: widget.workspaceId == "" ? addData : updateData,
           child: Container(
             height: 30,
             alignment: Alignment.center,
@@ -223,8 +247,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
                   color: Colors.grey.withOpacity(0.2),
                   spreadRadius: 3,
                   blurRadius: 7,
-                  offset: const Offset(
-                      0, 1), // changes position of shadow
+                  offset: const Offset(0, 1), // changes position of shadow
                 ),
               ],
               borderRadius: const BorderRadius.all(
