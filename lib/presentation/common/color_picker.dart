@@ -3,8 +3,9 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class WorkspaceColor extends StatefulWidget {
   final ValueChanged<Color> onColorChanged;
+  final Color? defaultColor;
 
-  const WorkspaceColor({super.key, required this.onColorChanged});
+  const WorkspaceColor({super.key, required this.onColorChanged, this.defaultColor});
 
   @override
   State<WorkspaceColor> createState() => _ColorPickerState();
@@ -20,6 +21,16 @@ class _ColorPickerState extends State<WorkspaceColor> {
     setState(() => pickerColor = color);
   }
 
+  @override
+  void initState() {
+    if(widget.defaultColor != null){
+      setState(() {
+        currentColor = widget.defaultColor!;
+        pickerColor = widget.defaultColor!;
+      });
+    }
+    super.initState();
+  }
   void _changeColor(BuildContext context) {
     showDialog<void>(
       context: context,

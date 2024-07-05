@@ -37,7 +37,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     _getCurrentUser();
     apiService = ApiService();
-
     super.initState();
   }
 
@@ -53,7 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
         response = result;
         final messageData = Message(
           chatId: response?.chatId ?? "",
-          message: response?.text ??"",
+          message: response?.text ?? "",
           createdTime: Timestamp.now(),
           chatSessionRef: currentUser?.primaryWorkSpace,
           createdBy: UserService().getUserReference(),
@@ -146,69 +145,91 @@ class _ChatScreenState extends State<ChatScreen> {
             title: Text(
               workSpaceName.toString().capitalize()!,
             ),
+            actions: [
+              Container(
+                padding: const EdgeInsets.only(right: 10),
+                child: IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (context) {
+                        return WorkflowDialog(
+                          name: snapshot.data?["name"],
+                          url : snapshot.data?['url'],
+                          workspaceColor : snapshot.data?['workSpaceColor'],
+                          workspaceId: snapshot.data?.id,
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
           drawer: _buildDrawer(),
           body: Column(
             children: [
               Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('messages')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('messages')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return const Center(
+                        child: Text('Error fetching data'),
+                      );
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(
+                        child: Text('No messages to show'),
+                      );
+                    }
+
+                    // Continue processing snapshot data
+                    final messages = snapshot.data!.docs
+                        .map((doc) =>
+                            Message.fromMap(doc.data() as Map<String, dynamic>))
+                        .where((message) =>
+                            message.chatSessionRef ==
+                            currentUser?.primaryWorkSpace)
+                        .toList();
+
+                    messages.sort(
+                        (a, b) => b.createdTime!.compareTo(a.createdTime!));
+
+                    if (messages.isEmpty) {
+                      return const NothingToShow();
+                    }
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: ListView.builder(
+                        reverse: true,
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message = messages[index];
+                          return message.isBotMessage
+                              ? ReceiverMessage(
+                                  text: message.message,
+                                  timestamp: message.createdTime!,
+                                )
+                              : SenderMessage(
+                                  text: message.message,
+                                  timestamp: message.createdTime!,
+                                );
+                        },
+                      ),
                     );
-                  }
-                  if (snapshot.hasError) {
-                    return const Center(
-                      child: Text('Error fetching data'),
-                    );
-                  }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(
-                      child: Text('No messages to show'),
-                    );
-                  }
-
-                  // Continue processing snapshot data
-                  final messages = snapshot.data!.docs
-                      .map((doc) =>
-                          Message.fromMap(doc.data() as Map<String, dynamic>))
-                      .where((message) =>
-                          message.chatSessionRef ==
-                          currentUser?.primaryWorkSpace)
-                      .toList();
-
-                  messages
-                      .sort((a, b) => b.createdTime!.compareTo(a.createdTime!));
-
-                  if (messages.isEmpty) {
-                    return const NothingToShow();
-                  }
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: ListView.builder(
-                      reverse: true,
-                      itemCount: messages.length,
-                      itemBuilder: (context, index) {
-                        final message = messages[index];
-                        return message.isBotMessage
-                            ? ReceiverMessage(
-                                text: message.message,
-                                timestamp: message.createdTime!,
-                              )
-                            : SenderMessage(
-                                text: message.message,
-                                timestamp: message.createdTime!,
-                              );
-                      },
-                    ),
-                  );
-                },
-              ),),
+                  },
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -281,7 +302,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   showDialog<void>(
                     context: context,
                     builder: (context) {
-                      return const WorkflowDialog();
+                      return WorkflowDialog();
                     },
                   );
                 },
@@ -296,7 +317,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         color: Colors.grey.withOpacity(0.2),
                         spreadRadius: 3,
                         blurRadius: 7,
-                        offset: const Offset(0, 1), // changes position of shadow
+                        offset:
+                            const Offset(0, 1), // changes position of shadow
                       ),
                     ],
                     borderRadius: const BorderRadius.all(
@@ -366,7 +388,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 showDialog<void>(
                   context: context,
                   builder: (context) {
-                    return const WorkflowDialog();
+                    return WorkflowDialog();
                   },
                 );
               },
@@ -471,8 +493,7 @@ class _ChatScreenState extends State<ChatScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => SettingsScreen()),
+                MaterialPageRoute(builder: (context) => SettingsScreen()),
               );
             },
           ),

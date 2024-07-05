@@ -9,7 +9,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class WorkflowDialog extends StatefulWidget {
-  const WorkflowDialog({super.key});
+  String? name;
+  String? url;
+  String? workspaceColor;
+  String? workspaceId;
+
+  WorkflowDialog({super.key,this.name,this.url,this.workspaceColor,this.workspaceId});
 
   @override
   _WorkflowDialogState createState() => _WorkflowDialogState();
@@ -21,6 +26,26 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   Color selectedWorkspaceColor = Colors.grey.withAlpha(70);
   Uint8List? _imageBytes;
   String? _imageUrl;
+  String? _btnText;
+
+  @override
+  void initState() {
+    _nameController.text = widget.name ?? "";
+    _urlController.text = widget.url ?? "";
+
+    if(widget.workspaceId!.isNotEmpty && widget.url!.isNotEmpty){
+      _btnText = "Update";
+    }else{
+      _btnText = "Save";
+    }
+
+    if(widget.workspaceColor != null){
+      setState(() {
+        selectedWorkspaceColor = Color(int.parse(widget.workspaceColor!));
+      });
+    }
+    super.initState();
+  }
 
   void onColorChanged(Color color) {
     setState(() {
@@ -68,6 +93,29 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
     context.showCustomSnackBar('Workspace added successfully');
   }
 
+  void updateData() async {
+    String name = _nameController.text.trim();
+    String url = _urlController.text.trim();
+
+    if (name.isEmpty || url.isEmpty) {
+      context.showCustomSnackBar('Please provide both name and URL');
+      return;
+    }
+
+    CollectionReference collectionReference = FirebaseFirestore.instance.collection('workspaces');
+
+    await collectionReference.doc(widget.workspaceId).update({
+      'name': name,
+      'url': url,
+      'image': _imageUrl,
+      'workSpaceColor': "0x${selectedWorkspaceColor.toHexString()}"
+    });
+
+    Navigator.pop(context);
+    context.showCustomSnackBar('Workspace updated successfully');
+  }
+
+
   Future<void> _uploadImageToFirebase(Uint8List fileBytes, String fileName) async {
     try {
       // Upload the image to Firebase Storage
@@ -107,7 +155,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
               decoration: const InputDecoration(labelText: 'URL'),
             ),
             const SizedBox(height: 16),
-            WorkspaceColor(onColorChanged: onColorChanged),
+            WorkspaceColor(onColorChanged: onColorChanged, defaultColor: selectedWorkspaceColor),
             _imageBytes != null
                 ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,13 +211,12 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
           child: const Text('Cancel'),
         ),
         InkWell(
-          onTap: addData,
+          onTap: widget.workspaceId =="" ? addData : updateData,
           child: Container(
             height: 30,
             alignment: Alignment.center,
             width: 80,
             decoration: BoxDecoration(
-              //0xFF39D2C0
               color: const Color(0xFF39D2C0),
               boxShadow: [
                 BoxShadow(
@@ -185,9 +232,9 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
               ),
             ),
             padding: const EdgeInsets.all(5),
-            child: const Text(
-              'Save',
-              style: TextStyle(fontSize: 15, color: Colors.white),
+            child: Text(
+              _btnText!,
+              style: const TextStyle(fontSize: 15, color: Colors.white),
             ),
           ),
         ),
