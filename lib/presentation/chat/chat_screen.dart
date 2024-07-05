@@ -27,11 +27,11 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   UserModel? currentUser;
   final TextEditingController _controller = TextEditingController();
-  Map<String, dynamic> _response = {};
   late ApiService apiService;
   SlammieBotResponse? response;
   bool isLoading = false;
   String errorMessage = '';
+  late DocumentSnapshot<Object?>? currentWorkspace;
 
   @override
   void initState() {
@@ -47,7 +47,11 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     try {
-      final result = await apiService.slammieChatBot(message);
+      final result = await apiService.slammieChatBot(
+          message,
+          url: currentWorkspace?['url'],
+          authToken: currentWorkspace?['tokenHeader']
+      );
       setState(() async {
         response = result;
         final messageData = Message(
@@ -137,6 +141,8 @@ class _ChatScreenState extends State<ChatScreen> {
       builder: (context, snapshot) {
         final workSpaceName = snapshot.data?["name"] ?? "";
         final workSpaceColor = snapshot.data?["workSpaceColor"] ?? "0xFF000000";
+        currentWorkspace = snapshot.data;
+
         return Scaffold(
           appBar: AppBar(
             elevation: 5,
@@ -176,7 +182,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       .collection('messages')
                       .snapshots(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
+                    if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
@@ -191,7 +197,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Text('No messages to show'),
                       );
                     }
-
                     // Continue processing snapshot data
                     final messages = snapshot.data!.docs
                         .map((doc) =>
@@ -302,7 +307,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   showDialog<void>(
                     context: context,
                     builder: (context) {
-                      return WorkflowDialog();
+                      return WorkflowDialog(workspaceId:null);
                     },
                   );
                 },
@@ -388,7 +393,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 showDialog<void>(
                   context: context,
                   builder: (context) {
-                    return WorkflowDialog();
+                    return WorkflowDialog(workspaceId:null);
                   },
                 );
               },

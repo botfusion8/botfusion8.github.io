@@ -25,6 +25,8 @@ class WorkflowDialog extends StatefulWidget {
 
   @override
   _WorkflowDialogState createState() => _WorkflowDialogState();
+
+
 }
 
 class _WorkflowDialogState extends State<WorkflowDialog> {
@@ -42,7 +44,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
     _nameController.text = widget.name ?? "";
     _urlController.text = widget.url ?? "";
 
-    if (widget.workspaceId!.isNotEmpty && widget.url!.isNotEmpty) {
+    if (widget.workspaceId?.isNotEmpty == true && widget.url?.isNotEmpty == true) {
       _btnText = "Update";
     } else {
       _btnText = "Save";
@@ -82,6 +84,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   void addData() async {
     String name = _nameController.text.trim();
     String url = _urlController.text.trim();
+    String headerToken = _tokenHeader.text.trim();
 
     if (name.isEmpty || url.isEmpty) {
       context.showCustomSnackBar('Please provide both name and URL');
@@ -91,11 +94,13 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
     CollectionReference collectionReference =
         FirebaseFirestore.instance.collection('workspaces');
 
+
     await collectionReference.add({
       'userRef': UserService().getUserReference(),
       'name': name,
       'url': url,
       'image': _imageUrl,
+      'tokenHeader':headerToken,
       'workSpaceColor': "0x${selectedWorkspaceColor.toHexString()}"
     });
 
@@ -171,7 +176,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _tokenHeader,
-              decoration: const InputDecoration(labelText: 'Token Header'),
+              decoration: const InputDecoration(labelText: 'Header Token'),
             ),
             const SizedBox(height: 16),
             WorkspaceColor(
@@ -235,7 +240,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
           child: const Text('Cancel'),
         ),
         InkWell(
-          onTap: widget.workspaceId == "" ? addData : updateData,
+          onTap: (widget.workspaceId == null || widget.workspaceId!.isEmpty == true) ? addData : updateData,
           child: Container(
             height: 30,
             alignment: Alignment.center,

@@ -19,33 +19,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
+        centerTitle: true,
+        elevation: 5,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: <Widget>[
           FutureBuilder<UserModel?>(
-            future: SessionManager.getUser(),
-            builder: (context, snapshot) {
-              return UserAccountsDrawerHeader(
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  gradient: LinearGradient(
-                    colors: [Color(0xFFDB91B9), Color(0xFF39D2C0)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              future: SessionManager.getUser(),
+              builder: (context, snapshot) {
+                return Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFDB91B9), Color(0xFF39D2C0)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                   ),
-                ),
-                accountName: Text(snapshot.data?.name ?? "N/A"),
-                accountEmail: Text(snapshot.data?.email ?? 'N/A'),
-                currentAccountPicture: const CircleAvatar(
-                  backgroundColor: Colors.white54,
-                  child: Text(
-                    'JD',
-                    style: TextStyle(fontSize: 40.0, color: Colors.white),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white54,
+                          borderRadius: BorderRadius.all(Radius.circular(40))
+                        ),
+                        height: 80,
+                        width: 80,
+                        child:  const Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'JD',
+                            style: TextStyle(fontSize: 25.0, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(left: 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              snapshot.data?.name ?? "N/A",
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              snapshot.data?.email ?? 'N/A',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 18),
+                            )
+                          ],
+                        ),
+                      )
+                    ],
                   ),
-                ),
-              );
-            }),
+                );
+              }),
           const SizedBox(height: 30,),
           ListTile(
             leading: const Icon(Icons.lock),

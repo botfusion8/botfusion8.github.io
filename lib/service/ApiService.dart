@@ -4,14 +4,31 @@ import 'dart:convert';
 import '../models/slammie_bot_response.dart';
 
 class ApiService {
-  static const String _url = 'https://fusionflow.maslow.ai/api/v1/prediction/4bddea5e-c392-4dbe-bd05-3ef2aa60942d';
-  static const Map<String, String> _headers = {
+  final String _defaultUrl = 'https://fusionflow.maslow.ai/api/v1/prediction/4bddea5e-c392-4dbe-bd05-3ef2aa60942d';
+  final Map<String, String> _defaultHeaders = {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer vWxybfzjsUPjB2i4+/uoLrC6BMxvfXUD71o8hZWnf9Y=',
   };
 
-  Future<SlammieBotResponse> slammieChatBot(String message) async {
-    final Uri uri = Uri.parse(_url);
+  Future<SlammieBotResponse> slammieChatBot(String message, {String? url, String? authToken}) async {
+    Uri uri;
+
+    if(url != null){
+      uri = Uri.parse(url);
+    }else{
+      uri = Uri.parse(_defaultUrl);
+    }
+
+    Map<String, String> headers;
+
+    if(authToken != null){
+      headers = {
+        'Content-Type': 'application/json',
+        'Authorization': authToken,
+      };
+    }else{
+      headers = _defaultHeaders;
+    }
 
     final Map<String, dynamic> jsonBody = {
       "question": message,
@@ -22,7 +39,7 @@ class ApiService {
 
     final response = await http.post(
       uri,
-      headers: _headers,
+      headers: headers,
       body: json.encode(jsonBody),
     );
 
