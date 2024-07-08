@@ -1,12 +1,16 @@
 import 'dart:typed_data';
 import 'package:chatbot_text_tool/presentation/common/color_picker.dart';
 import 'package:chatbot_text_tool/service/user_service.dart';
+import 'package:chatbot_text_tool/utils/captalize_string.dart';
 import 'package:chatbot_text_tool/utils/custom_snackbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
+import '../common/nothing_to_show.dart';
 
 class WorkflowDialog extends StatefulWidget {
   String? name;
@@ -32,12 +36,15 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
   final TextEditingController _tokenHeader = TextEditingController();
+  final TextEditingController _confirmDeleteController =
+      TextEditingController();
 
   Color selectedWorkspaceColor = Colors.grey.withAlpha(70);
   Uint8List? _imageBytes;
   String? _imageUrl;
   String? _btnText;
   String? dialogHeaderText;
+  bool _showConfirmDeleteField = false;
 
   @override
   void initState() {
@@ -131,6 +138,76 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
 
     Navigator.pop(context);
     context.showCustomSnackBar('Workspace updated successfully');
+  }
+
+  void deleteData() async {
+    String confirmText = _confirmDeleteController.text.trim();
+
+    if (confirmText != 'workspace') {
+      context
+          .showCustomSnackBar('Please type "Confirm" to delete the workspace');
+      return;
+    }
+
+    String newPrimaryWorkspaceId = await showSelectWorkspaceDialog();
+
+    if (newPrimaryWorkspaceId == null) {
+      return;
+    }
+
+    await updatePrimaryWorkspace(newPrimaryWorkspaceId);
+    CollectionReference collectionReference =
+        FirebaseFirestore.instance.collection('workspaces');
+
+    await collectionReference.doc(widget.workspaceId).delete();
+
+    Navigator.pop(context);
+    Navigator.pushNamed(context, '/chatScreen');
+  }
+
+  Future<String> showSelectWorkspaceDialog() async {
+    // Example implementation using a simple dialog
+    String? selectedWorkspaceId = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        // Replace with your actual dialog implementation
+        return AlertDialog(
+          title: const Text("Select Primary Workspace"),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(null); // Cancel dialog
+              },
+            ),
+            TextButton(
+              child: const Text('Select'),
+              onPressed: () {
+                Navigator.of(context).pop(
+                    'selected_workspace_id'); // Replace with actual selected workspace ID
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    if (selectedWorkspaceId == null) {
+      throw Exception('User canceled selecting new primary workspace');
+    }
+
+    return selectedWorkspaceId;
+  }
+
+  Future<void> updatePrimaryWorkspace(String newPrimaryWorkspaceId) async {
+    // Assuming you have a 'users' collection where each document represents a user
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+    DocumentReference userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(userId);
+
+    await userDocRef.update({
+      'primaryWorkSpace': newPrimaryWorkspaceId,
+    });
   }
 
   Future<void> _uploadImageToFirebase(
@@ -231,7 +308,81 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
                 ),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
+            if (!_showConfirmDeleteField &&
+                !(widget.workspaceId == null ||
+                    widget.workspaceId!.isEmpty == true))
+              Align(
+                alignment: Alignment.centerLeft,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _showConfirmDeleteField = true;
+                    });
+                  },
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.delete_outlined,
+                        color: Colors.black54,
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text('Delete Workspace')
+                    ],
+                  ),
+                ),
+              ),
+            const SizedBox(height: 16),
+            if (_showConfirmDeleteField)
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                      'Confirm you want to delete this collection by typing its collection name: "workspace"'),
+                  TextFormField(
+                    controller: _confirmDeleteController,
+                    decoration: const InputDecoration(
+                      labelText: 'workspace',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  InkWell(
+                    onTap: deleteData,
+                    child: Container(
+                      height: 35,
+                      alignment: Alignment.center,
+                      width: 150,
+                      decoration: BoxDecoration(
+                        //0xFF39D2C0
+                        color: Colors.red,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            spreadRadius: 3,
+                            blurRadius: 7,
+                            offset: const Offset(
+                                0, 1), // changes position of shadow
+                          ),
+                        ],
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(5),
+                      child: const Text(
+                        'Delete',
+                        style: TextStyle(fontSize: 15, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              )
+            else
+              Container(),
           ],
         ),
       ),
