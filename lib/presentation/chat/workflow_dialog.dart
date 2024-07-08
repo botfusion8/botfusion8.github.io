@@ -1,7 +1,7 @@
 import 'dart:typed_data';
+import 'package:chatbot_text_tool/presentation/chat/chat_screen.dart';
 import 'package:chatbot_text_tool/presentation/common/color_picker.dart';
 import 'package:chatbot_text_tool/service/user_service.dart';
-import 'package:chatbot_text_tool/utils/captalize_string.dart';
 import 'package:chatbot_text_tool/utils/custom_snackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-import '../common/nothing_to_show.dart';
+import '../../service/shared_pref_service.dart';
 
 class WorkflowDialog extends StatefulWidget {
   String? name;
@@ -140,7 +140,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
     context.showCustomSnackBar('Workspace updated successfully');
   }
 
-  void deleteData() async {
+  void deleteWorkspace() async {
     String confirmText = _confirmDeleteController.text.trim();
 
     if (confirmText != 'workspace') {
@@ -149,45 +149,71 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
       return;
     }
 
-    String newPrimaryWorkspaceId = await showSelectWorkspaceDialog();
-
-    if (newPrimaryWorkspaceId == null) {
-      return;
-    }
-
-    await updatePrimaryWorkspace(newPrimaryWorkspaceId);
     CollectionReference collectionReference =
         FirebaseFirestore.instance.collection('workspaces');
 
     await collectionReference.doc(widget.workspaceId).delete();
-
-    Navigator.pop(context);
-    Navigator.pushNamed(context, '/chatScreen');
+    await showSelectWorkspaceDialog();
   }
 
   Future<String> showSelectWorkspaceDialog() async {
-    // Example implementation using a simple dialog
     String? selectedWorkspaceId = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
-        // Replace with your actual dialog implementation
+
         return AlertDialog(
           title: const Text("Select Primary Workspace"),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop(null); // Cancel dialog
-              },
-            ),
-            TextButton(
-              child: const Text('Select'),
-              onPressed: () {
-                Navigator.of(context).pop(
-                    'selected_workspace_id'); // Replace with actual selected workspace ID
-              },
-            ),
-          ],
+          content: StreamBuilder(
+            stream: FirebaseFirestore.instance.collection('workspaces').snapshots(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              final filteredDocs = snapshot.data!.docs.where((doc) {
+                return doc["userRef"] == UserService().getUserReference();
+              }).toList();
+
+              return SizedBox(
+                width: double.minPositive,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: filteredDocs.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListTile(
+                      title: Text(filteredDocs[index]['name']),
+                      onTap: () async {
+                        final doc = filteredDocs[index];
+                        final workspaceId = doc.id;
+                        final workspaceRef = FirebaseFirestore.instance
+                            .collection('workspaces')
+                            .doc(workspaceId);
+                        final userRef = UserService().getUserReference();
+                        try {
+                          await userRef.update({
+                            'primaryWorkSpace': workspaceRef,
+                          });
+                          await SessionManager.updateUserWorkSpace(
+                              workSpaceReferance: workspaceRef.id);
+
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ChatScreen()),
+                          );
+                        } catch (e) {
+                          print("Error updating workspace: $e");
+                        }
+                      });
+                  },
+                ),
+              );
+            },
+          ),
+
         );
       },
     );
@@ -350,7 +376,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
                   ),
                   const SizedBox(height: 16),
                   InkWell(
-                    onTap: deleteData,
+                    onTap: deleteWorkspace,
                     child: Container(
                       height: 35,
                       alignment: Alignment.center,

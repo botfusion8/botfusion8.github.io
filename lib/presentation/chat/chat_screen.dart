@@ -459,7 +459,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         child: GestureDetector(
                           onTap: () async {
-                            final workspaceId = doc.id;
+                        final workspaceId = doc.id;
                             final workspaceRef = FirebaseFirestore.instance
                                 .collection('workspaces')
                                 .doc(workspaceId);
