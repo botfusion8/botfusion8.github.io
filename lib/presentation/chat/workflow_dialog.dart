@@ -15,18 +15,17 @@ class WorkflowDialog extends StatefulWidget {
   String? workspaceId;
   String? tokenHeader;
 
-  WorkflowDialog(
-      {super.key,
-      this.name,
-      this.url,
-      this.workspaceColor,
-      this.workspaceId,
-      this.tokenHeader});
+  WorkflowDialog({
+    super.key,
+    this.name,
+    this.url,
+    this.workspaceColor,
+    this.workspaceId,
+    this.tokenHeader,
+  });
 
   @override
   _WorkflowDialogState createState() => _WorkflowDialogState();
-
-
 }
 
 class _WorkflowDialogState extends State<WorkflowDialog> {
@@ -38,13 +37,15 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   Uint8List? _imageBytes;
   String? _imageUrl;
   String? _btnText;
+  String? dialogHeaderText;
 
   @override
   void initState() {
     _nameController.text = widget.name ?? "";
     _urlController.text = widget.url ?? "";
 
-    if (widget.workspaceId?.isNotEmpty == true && widget.url?.isNotEmpty == true) {
+    if (widget.workspaceId?.isNotEmpty == true &&
+        widget.url?.isNotEmpty == true) {
       _btnText = "Update";
     } else {
       _btnText = "Save";
@@ -94,13 +95,12 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
     CollectionReference collectionReference =
         FirebaseFirestore.instance.collection('workspaces');
 
-
     await collectionReference.add({
       'userRef': UserService().getUserReference(),
       'name': name,
       'url': url,
       'image': _imageUrl,
-      'tokenHeader':headerToken,
+      'tokenHeader': headerToken,
       'workSpaceColor': "0x${selectedWorkspaceColor.toHexString()}"
     });
 
@@ -126,7 +126,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
       'url': url,
       'image': _imageUrl,
       'workSpaceColor': "0x${selectedWorkspaceColor.toHexString()}",
-      'tokenHeader' : tokenHeader,
+      'tokenHeader': tokenHeader,
     });
 
     Navigator.pop(context);
@@ -157,7 +157,10 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
-      title: const Text('Create Workspace'),
+      title: Text(
+          (widget.workspaceId == null || widget.workspaceId!.isEmpty == true)
+              ? 'Create Workspace'
+              : 'Update Workspace'),
       contentPadding: const EdgeInsets.fromLTRB(15.0, 20.0, 15.0, 0),
       content: SizedBox(
         width: MediaQuery.of(context).size.width / 3,
@@ -240,7 +243,10 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
           child: const Text('Cancel'),
         ),
         InkWell(
-          onTap: (widget.workspaceId == null || widget.workspaceId!.isEmpty == true) ? addData : updateData,
+          onTap: (widget.workspaceId == null ||
+                  widget.workspaceId!.isEmpty == true)
+              ? addData
+              : updateData,
           child: Container(
             height: 30,
             alignment: Alignment.center,

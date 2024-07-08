@@ -50,6 +50,8 @@ dependencies:
   intl:
   http:
   flutter_colorpicker:
+  flutter_markdown: ^0.7.3
+
 
 dev_dependencies:
   flutter_test:

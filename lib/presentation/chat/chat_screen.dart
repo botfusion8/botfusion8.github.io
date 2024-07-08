@@ -171,6 +171,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   },
                 ),
               ),
+              Container(
+                padding: const EdgeInsets.only(right: 10),
+                child: IconButton(
+                  icon: const Icon(Icons.delete_outlined),
+                  onPressed: deleteChats,
+                ),
+              ),
             ],
           ),
           drawer: _buildDrawer(),
@@ -213,24 +220,21 @@ class _ChatScreenState extends State<ChatScreen> {
                       return const NothingToShow();
                     }
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: ListView.builder(
-                        reverse: true,
-                        itemCount: messages.length,
-                        itemBuilder: (context, index) {
-                          final message = messages[index];
-                          return message.isBotMessage
-                              ? ReceiverMessage(
-                                  text: message.message,
-                                  timestamp: message.createdTime!,
-                                )
-                              : SenderMessage(
-                                  text: message.message,
-                                  timestamp: message.createdTime!,
-                                );
-                        },
-                      ),
+                    return ListView.builder(
+                      reverse: true,
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        final message = messages[index];
+                        return message.isBotMessage
+                            ? ReceiverMessage(
+                                text: message.message,
+                                timestamp: message.createdTime!,
+                              )
+                            : SenderMessage(
+                                text: message.message,
+                                timestamp: message.createdTime!,
+                              );
+                      },
                     );
                   },
                 ),
@@ -535,6 +539,29 @@ class _ChatScreenState extends State<ChatScreen> {
                 Navigator.of(context).pushNamedAndRemoveUntil(
                     '/login', (Route<dynamic> route) => false);
               },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void deleteChats() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: const Text("Are you sure you want to delete all chats? This action cannot be undone."),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text("Delete"),
+              onPressed: () {},
             ),
           ],
         );
