@@ -11,6 +11,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../../service/shared_pref_service.dart';
+import '../common/key_value_list.dart';
 
 class WorkflowDialog extends StatefulWidget {
   String? name;
@@ -36,10 +37,35 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
   final TextEditingController _tokenHeader = TextEditingController();
-  final TextEditingController _confirmDeleteController =
-      TextEditingController();
+  final TextEditingController _authHeaderKeyController = TextEditingController();
+  final TextEditingController _confirmDeleteController = TextEditingController();
 
-  Color selectedWorkspaceColor = Colors.grey.withAlpha(70);
+  var headerKeyValues = [
+    const MapEntry('key1', 'value1'),
+  ];
+
+  // Selected token type
+  String? selectedToken;
+
+  final authTokenTypes = [
+    "Bearer",
+    "Basic",
+    "Digest",
+    "OAuth",
+    "JWT",
+    "API Key",
+    "Hawk",
+    "AWS4-HMAC-SHA256",
+    "NTLM",
+    "Negotiate",
+    "Token",
+    "SAML",
+    "Access Token",
+    "Client-ID",
+    "Session ID"
+  ];
+
+  Color selectedWorkspaceColor = Colors.grey.withAlpha(100);
   Uint8List? _imageBytes;
   String? _imageUrl;
   String? _btnText;
@@ -94,6 +120,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
     String name = _nameController.text.trim();
     String url = _urlController.text.trim();
     String headerToken = _tokenHeader.text.trim();
+    String authHeaderKey = _authHeaderKeyController.text.trim();
 
     if (name.isEmpty || url.isEmpty) {
       context.showCustomSnackBar('Please provide both name and URL');
@@ -264,160 +291,297 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
           (widget.workspaceId == null || widget.workspaceId!.isEmpty == true)
               ? 'Create Workspace'
               : 'Update Workspace'),
-      contentPadding: const EdgeInsets.fromLTRB(15.0, 20.0, 15.0, 0),
-      content: SizedBox(
-        width: MediaQuery.of(context).size.width / 3,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Workspace name'),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _urlController,
-              decoration: const InputDecoration(labelText: 'URL'),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _tokenHeader,
-              decoration: const InputDecoration(labelText: 'Header Token'),
-            ),
-            const SizedBox(height: 16),
-            WorkspaceColor(
-                onColorChanged: onColorChanged,
-                defaultColor: selectedWorkspaceColor),
-            _imageBytes != null
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Selected Image:',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      _imageUrl != null
-                          ? Image.network(_imageUrl!,
-                              height: 100,
-                              width: double.infinity,
-                              fit: BoxFit.cover)
-                          : Container(),
-                      const SizedBox(height: 16),
-                    ],
-                  )
-                : const Text('No image selected'),
-            const SizedBox(height: 16),
-            InkWell(
-              onTap: _pickImage,
-              child: Container(
-                height: 35,
-                alignment: Alignment.center,
-                width: 150,
-                decoration: BoxDecoration(
-                  //0xFF39D2C0
-                  color: const Color(0xFF39D2C0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      spreadRadius: 3,
-                      blurRadius: 7,
-                      offset: const Offset(0, 1), // changes position of shadow
+      contentPadding: const EdgeInsets.all(20.0),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width / 2,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(labelText: 'Workspace name'),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _urlController,
+                          decoration: const InputDecoration(labelText: 'URL'),
+                        ),
+                        const SizedBox(height: 25),
+                        WorkspaceColor(
+                            onColorChanged: onColorChanged,
+                            defaultColor: selectedWorkspaceColor),
+                      ],
                     ),
+                  ),
+                  const SizedBox(width: 50,),
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      height: 150,
+                      width: 150,
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(75),
+                        border: Border.all(color: Colors.grey.withAlpha(100))
+                      ),
+                      child: _imageUrl != null
+                          ? Image.network(_imageUrl!,
+                          height: double.infinity,
+                          width: double.infinity,
+                          fit: BoxFit.cover) : const Icon(
+                        Icons.star,
+                        size: 80,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(height: 20),
+              Container(
+                decoration: BoxDecoration(
+                    color: Colors.grey.withAlpha(50),
+                    borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.security),
+                        SizedBox(width: 5,),
+                        Text(
+                          "Authorization",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 120,
+                          child: TextFormField(
+                            controller: _authHeaderKeyController,
+                            decoration: const InputDecoration(
+                              hintText: 'Key',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        SizedBox(
+                          width: 150,
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              hintText: 'Token Type',
+                              contentPadding: EdgeInsets.symmetric(vertical: 0),
+                              border: UnderlineInputBorder(),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: selectedToken,
+                                isExpanded: true,
+                                hint: const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 8),
+                                  child: Text('Token Type',
+                                      overflow: TextOverflow.ellipsis),
+                                ),
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    selectedToken = newValue;
+                                  });
+                                },
+                                items: authTokenTypes
+                                    .map<DropdownMenuItem<String>>(
+                                        (String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        child: Text(value,
+                                            overflow: TextOverflow.ellipsis)),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _tokenHeader,
+                            decoration: const InputDecoration(
+                                hintText: 'Header Token'
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
                   ],
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(10),
-                  ),
-                ),
-                padding: const EdgeInsets.all(5),
-                child: const Text(
-                  'Select Image',
-                  style: TextStyle(fontSize: 15, color: Colors.white),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            if (!_showConfirmDeleteField &&
-                !(widget.workspaceId == null ||
-                    widget.workspaceId!.isEmpty == true))
-              Align(
-                alignment: Alignment.centerLeft,
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _showConfirmDeleteField = true;
-                    });
-                  },
-                  child: const Row(
-                    children: [
-                      Icon(
-                        Icons.delete_outlined,
-                        color: Colors.black54,
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text('Delete Workspace')
-                    ],
-                  ),
-                ),
-              ),
-            const SizedBox(height: 16),
-            if (_showConfirmDeleteField)
+              const SizedBox(height: 16),
               Column(
-                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                      'Confirm you want to delete this collection by typing its collection name: "workspace"'),
-                  TextFormField(
-                    controller: _confirmDeleteController,
-                    decoration: const InputDecoration(
-                      labelText: 'workspace',
-                    ),
+                    "Header Values",
+                    style: TextStyle(fontSize: 16),
                   ),
-                  const SizedBox(height: 16),
-                  InkWell(
-                    onTap: deleteWorkspace,
-                    child: Container(
-                      height: 35,
-                      alignment: Alignment.center,
-                      width: 150,
-                      decoration: BoxDecoration(
-                        //0xFF39D2C0
-                        color: Colors.red,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            spreadRadius: 3,
-                            blurRadius: 7,
-                            offset: const Offset(
-                                0, 1), // changes position of shadow
+                  const SizedBox(height: 10,),
+                  KeyValueList(
+                    initialPairs: headerKeyValues,
+                    onChanged: (pairs) {
+                      setState(() {
+                        headerKeyValues = pairs;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (_showConfirmDeleteField)
+                Container(
+                  decoration: BoxDecoration(
+                    color : Colors.redAccent.withAlpha(50),
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(Icons.delete,color: Colors.black87),
+                              SizedBox(width: 5,),
+                              Text(
+                                "Delete Workspace",
+                                style: TextStyle(fontSize: 16,color: Colors.black87),
+                              ),
+                            ],
                           ),
+
+                          GestureDetector(
+                              onTap: (){
+                                setState(() {
+                                  _showConfirmDeleteField = false;
+                                });
+                              },
+                              child: const Icon(Icons.close,color: Colors.black87)
+                          )
                         ],
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(10),
+                      ),
+                      const SizedBox(height: 15,),
+                      const Text(
+                        'Confirm you want to delete this collection by typing its collection name: "Name of your workspace"',
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                      TextFormField(
+                        controller: _confirmDeleteController,
+                        style: const TextStyle(
+                          fontSize: 14
+                        ),
+                        decoration: const InputDecoration(
+                          hintText: 'Type name of Workspace',
+                          hintStyle: TextStyle(
+                              fontSize: 14,
+                            color: Colors.black54
+                          ),
                         ),
                       ),
-                      padding: const EdgeInsets.all(5),
-                      child: const Text(
-                        'Delete',
-                        style: TextStyle(fontSize: 15, color: Colors.white),
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: deleteWorkspace,
+                        child: Container(
+                          height: 35,
+                          alignment: Alignment.center,
+                          width: 150,
+                          decoration: BoxDecoration(
+                            //0xFF39D2C0
+                            color: Colors.red,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                spreadRadius: 3,
+                                blurRadius: 7,
+                                offset: const Offset(
+                                    0, 1), // changes position of shadow
+                              ),
+                            ],
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(10),
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(5),
+                          child: const Text(
+                            'Delete',
+                            style: TextStyle(fontSize: 15, color: Colors.white),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  const SizedBox(height: 32),
-                ],
-              )
-            else
-              Container(),
-          ],
+                )
+            ],
+          ),
         ),
       ),
       actions: [
+        if (!_showConfirmDeleteField && !(widget.workspaceId == null || widget.workspaceId!.isEmpty == true))
+          InkWell(
+            onTap: () {
+              setState(() {
+                _showConfirmDeleteField = true;
+              });
+            },
+            child: Container(
+              width: 155,
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(40),
+                  border: Border.all(color: Colors.grey.withAlpha(10))
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.delete_outlined,
+                    color: Colors.redAccent.withAlpha(180),
+                    size: 22,
+                  ),
+                  Text(
+                    'Delete Workspace',
+                    style: TextStyle(
+                      color: Colors.redAccent.withAlpha(180),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: const Text('Cancel'),
+          child: const Text('Cancel', style: TextStyle(
+            color: Colors.black87
+          ),),
         ),
         InkWell(
           onTap: (widget.workspaceId == null ||
