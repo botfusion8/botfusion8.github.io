@@ -7,7 +7,6 @@ import 'package:chatbot_text_tool/presentation/settings/settings_screen.dart';
 import 'package:chatbot_text_tool/utils/captalize_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../models/slammie_bot_response.dart';
