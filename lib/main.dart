@@ -10,12 +10,12 @@ Future main() async {
   if (kIsWeb) {
     await Firebase.initializeApp(
         options: const FirebaseOptions(
-      apiKey: "AIzaSyBImXvC9KNtEyYLizHE4oVIfnrtnEv3dcg",
-      projectId: "apitesttool-b21bf",
-      messagingSenderId: "649900765132",
-      appId: "1:649900765132:web:9f06a7ab44a9a06a71f769",
-          databaseURL: "https://apitesttool-b21bf.firebaseio.com", // Update with your database URL
-          storageBucket: "apitesttool-b21bf.appspot.com",
+      apiKey: "AIzaSyBjAe_zRe0UiiXLzPmM9sYgwiJXrwi5QKE",
+      projectId: "chattestify",
+      messagingSenderId: "205307791603",
+      appId: "1:205307791603:web:66d82d84116b143e998f86",
+          databaseURL: "https://chattestify.firebaseio.com", // Update with your database URL
+          storageBucket: "chattestify.appspot.com",
         ));
   }
   await Firebase.initializeApp();
