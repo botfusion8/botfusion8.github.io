@@ -7,7 +7,6 @@ import 'package:chatbot_text_tool/presentation/settings/settings_screen.dart';
 import 'package:chatbot_text_tool/utils/captalize_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../models/slammie_bot_response.dart';
@@ -33,7 +32,6 @@ class _ChatScreenState extends State<ChatScreen> {
   String errorMessage = '';
   late DocumentSnapshot<Object?>? currentWorkspace;
 
-
   @override
   void initState() {
     _getCurrentUser();
@@ -48,9 +46,13 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     try {
+      final workspaceData = currentWorkspace!.data() as Map<String, dynamic>;
+      print('${workspaceData.containsKey('chatId')} workspace Data list');
+
       final result = await apiService.slammieChatBot(message,
           url: currentWorkspace?['url'],
-          authToken: currentWorkspace?['tokenHeader']);
+          authToken: currentWorkspace?['tokenHeader'],
+          sessionId: workspaceData.containsKey('chatId') ? currentWorkspace!['chatId'] : '');
       setState(() async {
         response = result;
         final messageData = Message(
@@ -68,6 +70,14 @@ class _ChatScreenState extends State<ChatScreen> {
               .add(messageData.toMap());
 
           print('Message sent successfully!');
+
+
+          if (!workspaceData.containsKey('chatId')) {
+            await currentWorkspace!.reference.update({
+              'chatId': response?.chatId ?? "",
+            });
+            print('Key updated successfully!');
+          }
         } catch (e) {
           print('Error sending message: $e');
         }
@@ -98,9 +108,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     final messageData = Message(
-      chatId: currentWorkspace!["sessionId"] != null
-          ? currentWorkspace!["sessionId"]
-          : '',
+      chatId: '',
       message: messageText,
       createdTime: Timestamp.now(),
       chatSessionRef: currentUser?.primaryWorkSpace,
@@ -163,6 +171,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         return WorkflowDialog(
                           name: snapshot.data?["name"],
                           url: snapshot.data?['url'],
+                          tokenHeader: snapshot.data?['tokenHeader'],
                           workspaceColor: snapshot.data?['workSpaceColor'],
                           workspaceId: snapshot.data?.id,
                         );

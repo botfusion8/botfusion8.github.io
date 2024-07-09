@@ -10,7 +10,7 @@ class ApiService {
     'Authorization': 'Bearer vWxybfzjsUPjB2i4+/uoLrC6BMxvfXUD71o8hZWnf9Y=',
   };
 
-  Future<SlammieBotResponse> slammieChatBot(String message, {String? url, String? authToken}) async {
+  Future<SlammieBotResponse> slammieChatBot(String message, {String? url, String? authToken,String? sessionId}) async {
     Uri uri;
 
     if(url != null){
@@ -33,7 +33,8 @@ class ApiService {
     final Map<String, dynamic> jsonBody = {
       "question": message,
       "overrideConfig": {
-        "disableFileDownload": true
+        "disableFileDownload": true,
+        "sessionId" : sessionId,
       }
     };
 

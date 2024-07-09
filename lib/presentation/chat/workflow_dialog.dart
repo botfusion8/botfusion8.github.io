@@ -50,6 +50,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   void initState() {
     _nameController.text = widget.name ?? "";
     _urlController.text = widget.url ?? "";
+    _tokenHeader.text = widget.tokenHeader ?? "";
 
     if (widget.workspaceId?.isNotEmpty == true &&
         widget.url?.isNotEmpty == true) {
