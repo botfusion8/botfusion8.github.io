@@ -33,6 +33,7 @@ class _ChatScreenState extends State<ChatScreen> {
   String errorMessage = '';
   late DocumentSnapshot<Object?>? currentWorkspace;
 
+
   @override
   void initState() {
     _getCurrentUser();
@@ -47,11 +48,9 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     try {
-      final result = await apiService.slammieChatBot(
-          message,
+      final result = await apiService.slammieChatBot(message,
           url: currentWorkspace?['url'],
-          authToken: currentWorkspace?['tokenHeader']
-      );
+          authToken: currentWorkspace?['tokenHeader']);
       setState(() async {
         response = result;
         final messageData = Message(
@@ -99,10 +98,11 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     final messageData = Message(
-      chatId: 'chatId123',
+      chatId: currentWorkspace!["sessionId"] != null
+          ? currentWorkspace!["sessionId"]
+          : '',
       message: messageText,
       createdTime: Timestamp.now(),
-      // Default value or skip if not available
       chatSessionRef: currentUser?.primaryWorkSpace,
       createdBy: UserService().getUserReference(),
       isBotMessage: false,
@@ -162,8 +162,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       builder: (context) {
                         return WorkflowDialog(
                           name: snapshot.data?["name"],
-                          url : snapshot.data?['url'],
-                          workspaceColor : snapshot.data?['workSpaceColor'],
+                          url: snapshot.data?['url'],
+                          workspaceColor: snapshot.data?['workSpaceColor'],
                           workspaceId: snapshot.data?.id,
                         );
                       },
@@ -189,7 +189,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       .collection('messages')
                       .snapshots(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                    if (snapshot.connectionState == ConnectionState.waiting &&
+                        !snapshot.hasData) {
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
@@ -311,7 +312,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   showDialog<void>(
                     context: context,
                     builder: (context) {
-                      return WorkflowDialog(workspaceId:null);
+                      return WorkflowDialog(workspaceId: null);
                     },
                   );
                 },
@@ -397,7 +398,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 showDialog<void>(
                   context: context,
                   builder: (context) {
-                    return WorkflowDialog(workspaceId:null);
+                    return WorkflowDialog(workspaceId: null);
                   },
                 );
               },
@@ -422,8 +423,10 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Expanded(
-            child: FutureBuilder<QuerySnapshot>(
-              future: FirebaseFirestore.instance.collection('workspaces').get(),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('workspaces')
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -459,7 +462,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         child: GestureDetector(
                           onTap: () async {
-                        final workspaceId = doc.id;
+                            final workspaceId = doc.id;
                             final workspaceRef = FirebaseFirestore.instance
                                 .collection('workspaces')
                                 .doc(workspaceId);
@@ -483,10 +486,12 @@ class _ChatScreenState extends State<ChatScreen> {
                               Icons.arrow_forward_ios,
                               size: 15,
                             ),
-                            title: Text(filteredDocs[index]["name"]
-                                    .toString()
-                                    .capitalize() ??
-                                ""),
+                            title: Text(
+                              filteredDocs[index]["name"]
+                                      .toString()
+                                      .capitalize() ??
+                                  "",
+                            ),
                           ),
                         ),
                       );
@@ -551,7 +556,8 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          content: const Text("Are you sure you want to delete all chats? This action cannot be undone."),
+          content: const Text(
+              "Are you sure you want to delete all chats? This action cannot be undone."),
           actions: <Widget>[
             TextButton(
               child: const Text("Cancel"),

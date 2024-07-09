@@ -171,7 +171,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
               }
 
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }
 
               final filteredDocs = snapshot.data!.docs.where((doc) {
@@ -213,7 +213,6 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
               );
             },
           ),
-
         );
       },
     );
