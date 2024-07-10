@@ -2,7 +2,7 @@ import 'package:chatbot_text_tool/models/messages.dart';
 import 'package:chatbot_text_tool/models/user.dart';
 import 'package:chatbot_text_tool/presentation/chat/receiver_message.dart';
 import 'package:chatbot_text_tool/presentation/chat/sender_message.dart';
-import 'package:chatbot_text_tool/presentation/chat/workflow_dialog.dart';
+import 'package:chatbot_text_tool/presentation/chat/workspace_dialog.dart';
 import 'package:chatbot_text_tool/presentation/settings/settings_screen.dart';
 import 'package:chatbot_text_tool/utils/captalize_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -47,7 +47,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     try {
       final workspaceData = currentWorkspace!.data() as Map<String, dynamic>;
-      print('${workspaceData.containsKey('chatId')} workspace Data list');
+      debugPrint('${workspaceData.containsKey('chatId')} workspace Data list');
 
       final result = await apiService.slammieChatBot(message,
           url: currentWorkspace?['url'],
@@ -69,17 +69,17 @@ class _ChatScreenState extends State<ChatScreen> {
               .collection('messages')
               .add(messageData.toMap());
 
-          print('Message sent successfully!');
+          debugPrint('Message sent successfully!');
 
 
           if (!workspaceData.containsKey('chatId')) {
             await currentWorkspace!.reference.update({
               'chatId': response?.chatId ?? "",
             });
-            print('Key updated successfully!');
+            debugPrint('Key updated successfully!');
           }
         } catch (e) {
-          print('Error sending message: $e');
+          debugPrint('Error sending message: $e');
         }
       });
     } catch (error) {
@@ -122,9 +122,9 @@ class _ChatScreenState extends State<ChatScreen> {
           .add(messageData.toMap());
       fetchResponse(_controller.text);
       _controller.clear();
-      print('Message sent successfully!');
+      debugPrint('Message sent successfully!');
     } catch (e) {
-      print('Error sending message: $e');
+      debugPrint('Error sending message: $e');
     }
   }
 
@@ -163,15 +163,15 @@ class _ChatScreenState extends State<ChatScreen> {
               Container(
                 padding: const EdgeInsets.only(right: 10),
                 child: IconButton(
-                  icon: const Icon(Icons.edit),
+                  icon: const Icon(Icons.edit_note,size: 35,),
                   onPressed: () {
                     showDialog<void>(
                       context: context,
                       builder: (context) {
-                        return WorkflowDialog(
+                        return WorkspaceDialog(
                           name: snapshot.data?["name"],
                           url: snapshot.data?['url'],
-                          tokenHeader: snapshot.data?['tokenHeader'],
+                          authentication: snapshot.data?['authentication'],
                           workspaceColor: snapshot.data?['workSpaceColor'],
                           workspaceId: snapshot.data?.id,
                         );
@@ -180,13 +180,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   },
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.only(right: 10),
-                child: IconButton(
-                  icon: const Icon(Icons.delete_outlined),
-                  onPressed: deleteChats,
-                ),
-              ),
+              // Container(
+              //   padding: const EdgeInsets.only(right: 10),
+              //   child: IconButton(
+              //     icon: const Icon(Icons.delete_outlined),
+              //     onPressed: deleteChats,
+              //   ),
+              // ),
             ],
           ),
           drawer: _buildDrawer(),
@@ -196,6 +196,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
                       .collection('messages')
+                      .where('chatSessionRef', isEqualTo:currentUser?.primaryWorkSpace)
+                      .orderBy('createdTime', descending: true)
                       .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting &&
@@ -203,49 +205,36 @@ class _ChatScreenState extends State<ChatScreen> {
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
-                    }
-                    if (snapshot.hasError) {
+                    }else if (snapshot.hasError) {
                       return const Center(
                         child: Text('Error fetching data'),
                       );
-                    }
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    }else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                       return const Center(
                         child: Text('No messages to show'),
                       );
+                    }else{
+                      if (snapshot.data!.docs.isEmpty) {
+                        return const NothingToShow();
+                      }
+
+                      return ListView.builder(
+                        reverse: true,
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          final message = Message.fromMap(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                          return message.isBotMessage
+                              ? ReceiverMessage(
+                            text: message.message,
+                            timestamp: message.createdTime!,
+                          )
+                              : SenderMessage(
+                            text: message.message,
+                            timestamp: message.createdTime!,
+                          );
+                        },
+                      );
                     }
-                    // Continue processing snapshot data
-                    final messages = snapshot.data!.docs
-                        .map((doc) =>
-                            Message.fromMap(doc.data() as Map<String, dynamic>))
-                        .where((message) =>
-                            message.chatSessionRef ==
-                            currentUser?.primaryWorkSpace)
-                        .toList();
-
-                    messages.sort(
-                        (a, b) => b.createdTime!.compareTo(a.createdTime!));
-
-                    if (messages.isEmpty) {
-                      return const NothingToShow();
-                    }
-
-                    return ListView.builder(
-                      reverse: true,
-                      itemCount: messages.length,
-                      itemBuilder: (context, index) {
-                        final message = messages[index];
-                        return message.isBotMessage
-                            ? ReceiverMessage(
-                                text: message.message,
-                                timestamp: message.createdTime!,
-                              )
-                            : SenderMessage(
-                                text: message.message,
-                                timestamp: message.createdTime!,
-                              );
-                      },
-                    );
                   },
                 ),
               ),
@@ -321,7 +310,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   showDialog<void>(
                     context: context,
                     builder: (context) {
-                      return WorkflowDialog(workspaceId: null);
+                      return WorkspaceDialog(workspaceId: null);
                     },
                   );
                 },
@@ -407,7 +396,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 showDialog<void>(
                   context: context,
                   builder: (context) {
-                    return WorkflowDialog(workspaceId: null);
+                    return WorkspaceDialog(workspaceId: null);
                   },
                 );
               },
@@ -435,78 +424,74 @@ class _ChatScreenState extends State<ChatScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('workspaces')
+                  .where("userRef", isEqualTo:UserService().getUserReference())
+                  .orderBy("lastUpdatedTime",descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
+                }else if (snapshot.hasError) {
                   return const Center(child: Text('Error fetching data'));
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                }else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return const NothingToShow();
-                }
+                }else{
+                  if (snapshot.data!.docs.isEmpty) {
+                    return const NothingToShow();
+                  }
 
-                final filteredDocs = snapshot.data!.docs.where((doc) {
-                  return doc["userRef"] == UserService().getUserReference();
-                }).toList();
-
-                if (filteredDocs.isEmpty) {
-                  return const NothingToShow();
-                }
-
-                return Container(
-                  margin: const EdgeInsets.only(top: 10),
-                  child: ListView.builder(
-                    itemCount: filteredDocs.length,
-                    itemBuilder: (context, index) {
-                      final doc = filteredDocs[index];
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                          color:
-                              currentUser?.primaryWorkSpace == doc.reference.id
-                                  ? const Color(0Xff39d2c0).withAlpha(100)
-                                  : Colors.transparent,
-                        ),
-                        child: GestureDetector(
-                          onTap: () async {
-                            final workspaceId = doc.id;
-                            final workspaceRef = FirebaseFirestore.instance
-                                .collection('workspaces')
-                                .doc(workspaceId);
-                            final userRef = UserService().getUserReference();
-                            try {
-                              await userRef.update({
-                                'primaryWorkSpace': workspaceRef,
-                              });
-                              await SessionManager.updateUserWorkSpace(
-                                  workSpaceReferance: workspaceRef.id);
-                              Navigator.pop(context);
-                              setState(() {
-                                _getCurrentUser();
-                              });
-                            } catch (e) {
-                              print("Error updating workspace: $e");
-                            }
-                          },
-                          child: ListTile(
-                            trailing: const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 15,
-                            ),
-                            title: Text(
-                              filteredDocs[index]["name"]
-                                      .toString()
-                                      .capitalize() ??
-                                  "",
+                  return Container(
+                    margin: const EdgeInsets.only(top: 10),
+                    child: ListView.builder(
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        final doc = snapshot.data!.docs[index];
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            color:
+                            currentUser?.primaryWorkSpace == doc.reference.id
+                                ? const Color(0Xff39d2c0).withAlpha(100)
+                                : Colors.transparent,
+                          ),
+                          child: GestureDetector(
+                            onTap: () async {
+                              final workspaceId = doc.id;
+                              final workspaceRef = FirebaseFirestore.instance
+                                  .collection('workspaces')
+                                  .doc(workspaceId);
+                              final userRef = UserService().getUserReference();
+                              try {
+                                await userRef.update({
+                                  'primaryWorkSpace': workspaceRef,
+                                });
+                                await SessionManager.updateUserWorkSpace(
+                                    workSpaceReferance: workspaceRef.id);
+                                Navigator.pop(context);
+                                setState(() {
+                                  _getCurrentUser();
+                                });
+                              } catch (e) {
+                                print("Error updating workspace: $e");
+                              }
+                            },
+                            child: ListTile(
+                              trailing: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 15,
+                              ),
+                              title: Text(
+                                    doc["name"]
+                                    .toString()
+                                    .capitalize() ??
+                                    "",
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                );
+                        );
+                      },
+                    ),
+                  );
+                }
               },
             ),
           ),

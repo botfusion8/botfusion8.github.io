@@ -17,13 +17,17 @@ class SenderMessage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         margin: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
             colors: [Color(0xFFDB91B9), Color(0xFF39D2C0)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(10)
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(8),
+              bottomLeft: Radius.circular(8),
+              bottomRight: Radius.circular(8)
+          )
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,

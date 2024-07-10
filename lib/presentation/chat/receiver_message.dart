@@ -20,7 +20,11 @@ class ReceiverMessage extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
         decoration: BoxDecoration(
           color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(8),
+              bottomLeft: Radius.circular(8),
+              bottomRight: Radius.circular(8)
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -12,28 +12,29 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../../service/shared_pref_service.dart';
 import '../common/key_value_list.dart';
+import '../common/nothing_to_show.dart';
 
-class WorkflowDialog extends StatefulWidget {
+class WorkspaceDialog extends StatefulWidget {
   String? name;
   String? url;
   String? workspaceColor;
   String? workspaceId;
-  String? tokenHeader;
+  dynamic authentication;
 
-  WorkflowDialog({
+  WorkspaceDialog({
     super.key,
     this.name,
     this.url,
     this.workspaceColor,
     this.workspaceId,
-    this.tokenHeader,
+    this.authentication,
   });
 
   @override
-  _WorkflowDialogState createState() => _WorkflowDialogState();
+  _WorkspaceDialogState createState() => _WorkspaceDialogState();
 }
 
-class _WorkflowDialogState extends State<WorkflowDialog> {
+class _WorkspaceDialogState extends State<WorkspaceDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
   final TextEditingController _tokenHeader = TextEditingController();
@@ -45,7 +46,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   ];
 
   // Selected token type
-  String? selectedToken;
+  String? selectedTokenType;
 
   final authTokenTypes = [
     "Bearer",
@@ -76,7 +77,9 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   void initState() {
     _nameController.text = widget.name ?? "";
     _urlController.text = widget.url ?? "";
-    _tokenHeader.text = widget.tokenHeader ?? "";
+    _tokenHeader.text = widget.authentication?['token'] ?? "";
+    _authHeaderKeyController.text = widget.authentication?['key'] ?? "";
+    selectedTokenType = widget.authentication?['type'];
 
     if (widget.workspaceId?.isNotEmpty == true &&
         widget.url?.isNotEmpty == true) {
@@ -135,8 +138,14 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
       'name': name,
       'url': url,
       'image': _imageUrl,
-      'tokenHeader': headerToken,
-      'workSpaceColor': "0x${selectedWorkspaceColor.toHexString()}"
+      'workSpaceColor': "0x${selectedWorkspaceColor.toHexString()}",
+      'createdTime': Timestamp.now(),
+      'lastUpdatedTime': Timestamp.now(),
+      'authentication': {
+          "key":authHeaderKey,
+          "token":headerToken,
+          "type":selectedTokenType,
+       }
     });
 
     Navigator.pop(context);
@@ -146,7 +155,8 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   void updateData() async {
     String name = _nameController.text.trim();
     String url = _urlController.text.trim();
-    String tokenHeader = _tokenHeader.text.trim();
+    String headerToken = _tokenHeader.text.trim();
+    String authHeaderKey = _authHeaderKeyController.text.trim();
 
     if (name.isEmpty || url.isEmpty) {
       context.showCustomSnackBar('Please provide both name and URL');
@@ -161,7 +171,12 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
       'url': url,
       'image': _imageUrl,
       'workSpaceColor': "0x${selectedWorkspaceColor.toHexString()}",
-      'tokenHeader': tokenHeader,
+      'lastUpdatedTime': Timestamp.now(),
+      'authentication': {
+        "key":authHeaderKey,
+        "token":headerToken,
+        "type":selectedTokenType,
+      }
     });
 
     Navigator.pop(context);
@@ -171,7 +186,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
   void deleteWorkspace() async {
     String confirmText = _confirmDeleteController.text.trim();
 
-    if (confirmText != 'workspace') {
+    if (confirmText != widget.name) {
       context
           .showCustomSnackBar('Please type "Confirm" to delete the workspace');
       return;
@@ -192,53 +207,55 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
         return AlertDialog(
           title: const Text("Select Primary Workspace"),
           content: StreamBuilder(
-            stream: FirebaseFirestore.instance.collection('workspaces').snapshots(),
+            stream:  FirebaseFirestore.instance
+                .collection('workspaces')
+                .where("userRef", isEqualTo:UserService().getUserReference())
+                .orderBy("lastUpdatedTime",descending: true)
+                .snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
-              }
-
-              if (snapshot.connectionState == ConnectionState.waiting) {
+              }else if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
-              }
+              }else if(snapshot.data!.docs.isEmpty){
+                return const NothingToShow();
+              }else{
+                return SizedBox(
+                  width: double.minPositive,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (BuildContext context, int index) {
 
-              final filteredDocs = snapshot.data!.docs.where((doc) {
-                return doc["userRef"] == UserService().getUserReference();
-              }).toList();
+                      final doc = snapshot.data!.docs[index];
 
-              return SizedBox(
-                width: double.minPositive,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: filteredDocs.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return ListTile(
-                      title: Text(filteredDocs[index]['name']),
-                      onTap: () async {
-                        final doc = filteredDocs[index];
-                        final workspaceId = doc.id;
-                        final workspaceRef = FirebaseFirestore.instance
-                            .collection('workspaces')
-                            .doc(workspaceId);
-                        final userRef = UserService().getUserReference();
-                        try {
-                          await userRef.update({
-                            'primaryWorkSpace': workspaceRef,
+                      return ListTile(
+                          title: Text(doc['name']),
+                          onTap: () async {
+                            final workspaceId = doc.id;
+                            final workspaceRef = FirebaseFirestore.instance
+                                .collection('workspaces')
+                                .doc(workspaceId);
+                            final userRef = UserService().getUserReference();
+                            try {
+                              await userRef.update({
+                                'primaryWorkSpace': workspaceRef,
+                              });
+                              await SessionManager.updateUserWorkSpace(
+                                  workSpaceReferance: workspaceRef.id);
+
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => const ChatScreen()),
+                              );
+                            } catch (e) {
+                              debugPrint("Error updating workspace: $e");
+                            }
                           });
-                          await SessionManager.updateUserWorkSpace(
-                              workSpaceReferance: workspaceRef.id);
-
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ChatScreen()),
-                          );
-                        } catch (e) {
-                          print("Error updating workspace: $e");
-                        }
-                      });
-                  },
-                ),
-              );
+                    },
+                  ),
+                );
+              }
             },
           ),
         );
@@ -388,7 +405,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
-                                value: selectedToken,
+                                value: selectedTokenType,
                                 isExpanded: true,
                                 hint: const Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 8),
@@ -397,7 +414,7 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
                                 ),
                                 onChanged: (String? newValue) {
                                   setState(() {
-                                    selectedToken = newValue;
+                                    selectedTokenType = newValue;
                                   });
                                 },
                                 items: authTokenTypes
@@ -489,9 +506,25 @@ class _WorkflowDialogState extends State<WorkflowDialog> {
                         ],
                       ),
                       const SizedBox(height: 15,),
-                      const Text(
-                        'Confirm you want to delete this collection by typing its collection name: "Name of your workspace"',
-                        style: TextStyle(color: Colors.black54),
+                      RichText(
+                        text: const TextSpan(
+                          text: "Confirm you want to delete this collection by typing its collection name:",
+                          style: TextStyle(color: Colors.black54),
+                          children: [
+                            TextSpan(
+                              text: '"',
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                            TextSpan(
+                              text: 'Name of your workspace',
+                              style: TextStyle(color: Colors.black87),
+                            ),
+                            TextSpan(
+                              text: '"',
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                          ],
+                        ),
                       ),
                       TextFormField(
                         controller: _confirmDeleteController,
