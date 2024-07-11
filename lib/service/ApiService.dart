@@ -10,7 +10,7 @@ class ApiService {
     'Authorization': 'Bearer vWxybfzjsUPjB2i4+/uoLrC6BMxvfXUD71o8hZWnf9Y=',
   };
 
-  Future<SlammieBotResponse> slammieChatBot(String message, {String? url, String? authToken,String? sessionId}) async {
+  Future<SlammieBotResponse> slammieChatBot(String message, {String? url, dynamic authentication,String? sessionId}) async {
     Uri uri;
 
     if(url != null){
@@ -21,10 +21,10 @@ class ApiService {
 
     Map<String, String> headers;
 
-    if(authToken != null){
+    if(authentication != null){
       headers = {
         'Content-Type': 'application/json',
-        'Authorization': authToken,
+        authentication['key']: "${authentication['type']} ${authentication['token']}",
       };
     }else{
       headers = _defaultHeaders;

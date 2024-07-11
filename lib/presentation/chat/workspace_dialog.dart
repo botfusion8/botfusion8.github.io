@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 import '../../service/shared_pref_service.dart';
 import '../common/key_value_list.dart';
@@ -67,7 +68,6 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
   ];
 
   Color selectedWorkspaceColor = Colors.grey.withAlpha(100);
-  Uint8List? _imageBytes;
   String? _imageUrl;
   String? _btnText;
   String? dialogHeaderText;
@@ -107,16 +107,63 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
       type: FileType.image,
     );
 
-    if (result != null && result.files.single.bytes != null) {
-      final fileBytes = result.files.single.bytes!;
-      final fileName = result.files.single.name;
+    final pickedImageBytes = result?.files.single.bytes;
 
-      setState(() {
-        _imageBytes = fileBytes;
-      });
-
-      _uploadImageToFirebase(fileBytes, fileName);
+    // final cropImage = await _cropImage(pickedImagePath);
+    //
+    // if(cropImage != null){
+    //  final bytes = await cropImage.readAsBytes();
+    //  final fileBytes = bytes;
+    if(pickedImageBytes != null){
+      final fileName = "${UserService().getUserReference().id}_${Timestamp.now()}";
+      _uploadImageToFirebase(pickedImageBytes, fileName);
     }
+    //}
+  }
+
+
+  Future<CroppedFile?> _cropImage(String? pickedFile) async {
+    if (pickedFile != null) {
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile,
+        compressFormat: ImageCompressFormat.jpg,
+        compressQuality: 100,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Cropper',
+            toolbarColor: Colors.deepOrange,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.square,
+            lockAspectRatio: false,
+            aspectRatioPresets: [
+              CropAspectRatioPreset.original,
+              CropAspectRatioPreset.square,
+              CropAspectRatioPreset.ratio4x3,
+              CropAspectRatioPresetCustom(),
+            ],
+          ),
+          IOSUiSettings(
+            title: 'Cropper',
+            aspectRatioPresets: [
+              CropAspectRatioPreset.original,
+              CropAspectRatioPreset.square,
+              CropAspectRatioPreset.ratio4x3,
+              CropAspectRatioPresetCustom(),
+            ],
+          ),
+          WebUiSettings(
+            context: context,
+            presentStyle: WebPresentStyle.dialog,
+            size: const CropperSize(
+              width: 520,
+              height: 520,
+            ),
+          ),
+        ],
+      );
+      return croppedFile;
+    }
+    return null;
   }
 
   void addData() async {
@@ -649,4 +696,12 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
       ],
     );
   }
+}
+
+class CropAspectRatioPresetCustom implements CropAspectRatioPresetData {
+  @override
+    (int, int)? get data => (2, 3);
+
+  @override
+  String get name => '2x3 (customized)';
 }

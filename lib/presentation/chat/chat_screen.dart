@@ -51,7 +51,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
       final result = await apiService.slammieChatBot(message,
           url: currentWorkspace?['url'],
-          authToken: currentWorkspace?['tokenHeader'],
+          authentication: currentWorkspace?['authentication'],
           sessionId: workspaceData.containsKey('chatId') ? currentWorkspace!['chatId'] : '');
       setState(() async {
         response = result;
@@ -180,13 +180,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   },
                 ),
               ),
-              // Container(
-              //   padding: const EdgeInsets.only(right: 10),
-              //   child: IconButton(
-              //     icon: const Icon(Icons.delete_outlined),
-              //     onPressed: deleteChats,
-              //   ),
-              // ),
             ],
           ),
           drawer: _buildDrawer(),
