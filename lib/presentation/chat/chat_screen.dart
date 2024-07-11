@@ -4,6 +4,8 @@ import 'package:chatbot_text_tool/presentation/chat/receiver_message.dart';
 import 'package:chatbot_text_tool/presentation/chat/sender_message.dart';
 import 'package:chatbot_text_tool/presentation/chat/workspace_dialog.dart';
 import 'package:chatbot_text_tool/presentation/settings/settings_screen.dart';
+import 'package:chatbot_text_tool/presentation/share/client_info_dialog.dart';
+import 'package:chatbot_text_tool/presentation/share/share_history.dart';
 import 'package:chatbot_text_tool/utils/captalize_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -161,6 +163,31 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             actions: [
               Container(
+                padding: const EdgeInsets.only(right: 5),
+                child: IconButton(
+                  icon: const Icon(Icons.mobile_screen_share_outlined,size: 25,),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ShareHistoryScreen(workspaceColor: snapshot.data?['workSpaceColor'],)),
+                    );
+                  },
+                ),
+              ),   Container(
+                padding: const EdgeInsets.only(right: 5),
+                child: IconButton(
+                  icon: const Icon(Icons.share,size: 25,),
+                  onPressed: () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (context) {
+                        return ClientInfoDialog();
+                      },
+                    );
+                  },
+                ),
+              ),   Container(
                 padding: const EdgeInsets.only(right: 10),
                 child: IconButton(
                   icon: const Icon(Icons.edit_note,size: 35,),
@@ -180,13 +207,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   },
                 ),
               ),
-              // Container(
-              //   padding: const EdgeInsets.only(right: 10),
-              //   child: IconButton(
-              //     icon: const Icon(Icons.delete_outlined),
-              //     onPressed: deleteChats,
-              //   ),
-              // ),
             ],
           ),
           drawer: _buildDrawer(),
