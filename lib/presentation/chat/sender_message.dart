@@ -6,7 +6,7 @@ class SenderMessage extends StatelessWidget {
   final String text;
   final Timestamp timestamp;
 
-  SenderMessage({required this.text, required this.timestamp});
+  const SenderMessage({super.key, required this.text, required this.timestamp});
 
   @override
   Widget build(BuildContext context) {

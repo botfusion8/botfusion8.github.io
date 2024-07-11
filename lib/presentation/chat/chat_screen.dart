@@ -53,7 +53,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
       final result = await apiService.slammieChatBot(message,
           url: currentWorkspace?['url'],
-          authToken: currentWorkspace?['tokenHeader'],
+          authentication: currentWorkspace?['authentication'],
           sessionId: workspaceData.containsKey('chatId') ? currentWorkspace!['chatId'] : '');
       setState(() async {
         response = result;

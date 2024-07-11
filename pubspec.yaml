@@ -51,6 +51,7 @@ dependencies:
   http:
   flutter_colorpicker:
   flutter_markdown: ^0.7.3
+  image_cropper: ^7.1.0
 
 
 dev_dependencies:
