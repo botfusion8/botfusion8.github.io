@@ -54,7 +54,9 @@ class _ChatScreenState extends State<ChatScreen> {
       final result = await apiService.slammieChatBot(message,
           url: currentWorkspace?['url'],
           authentication: currentWorkspace?['authentication'],
-          sessionId: workspaceData.containsKey('chatId') ? currentWorkspace!['chatId'] : '');
+          sessionId: workspaceData.containsKey('chatId')
+              ? currentWorkspace!['chatId']
+              : '');
       setState(() async {
         response = result;
         final messageData = Message(
@@ -72,7 +74,6 @@ class _ChatScreenState extends State<ChatScreen> {
               .add(messageData.toMap());
 
           debugPrint('Message sent successfully!');
-
 
           if (!workspaceData.containsKey('chatId')) {
             await currentWorkspace!.reference.update({
@@ -165,32 +166,48 @@ class _ChatScreenState extends State<ChatScreen> {
               Container(
                 padding: const EdgeInsets.only(right: 5),
                 child: IconButton(
-                  icon: const Icon(Icons.mobile_screen_share_outlined,size: 25,),
+                  icon: const Icon(
+                    Icons.mobile_screen_share_outlined,
+                    size: 25,
+                  ),
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => ShareHistoryScreen(workspaceColor: snapshot.data?['workSpaceColor'],)),
+                        builder: (context) => ShareHistoryScreen(
+                          workspaceColor: snapshot.data?['workSpaceColor'],
+                        ),
+                      ),
                     );
                   },
                 ),
-              ),   Container(
+              ),
+              Container(
                 padding: const EdgeInsets.only(right: 5),
                 child: IconButton(
-                  icon: const Icon(Icons.share,size: 25,),
+                  icon: const Icon(
+                    Icons.share,
+                    size: 25,
+                  ),
                   onPressed: () {
                     showDialog<void>(
                       context: context,
                       builder: (context) {
-                        return ClientInfoDialog();
+                        return ClientInfoDialog(
+                          currentWorkspace: currentWorkspace!.id,
+                        );
                       },
                     );
                   },
                 ),
-              ),   Container(
+              ),
+              Container(
                 padding: const EdgeInsets.only(right: 10),
                 child: IconButton(
-                  icon: const Icon(Icons.edit_note,size: 35,),
+                  icon: const Icon(
+                    Icons.edit_note,
+                    size: 35,
+                  ),
                   onPressed: () {
                     showDialog<void>(
                       context: context,
@@ -216,7 +233,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
                       .collection('messages')
-                      .where('chatSessionRef', isEqualTo:currentUser?.primaryWorkSpace)
+                      .where('chatSessionRef',
+                          isEqualTo: currentUser?.primaryWorkSpace)
                       .orderBy('createdTime', descending: true)
                       .snapshots(),
                   builder: (context, snapshot) {
@@ -225,15 +243,16 @@ class _ChatScreenState extends State<ChatScreen> {
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
-                    }else if (snapshot.hasError) {
+                    } else if (snapshot.hasError) {
                       return const Center(
                         child: Text('Error fetching data'),
                       );
-                    }else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    } else if (!snapshot.hasData ||
+                        snapshot.data!.docs.isEmpty) {
                       return const Center(
                         child: Text('No messages to show'),
                       );
-                    }else{
+                    } else {
                       if (snapshot.data!.docs.isEmpty) {
                         return const NothingToShow();
                       }
@@ -242,16 +261,18 @@ class _ChatScreenState extends State<ChatScreen> {
                         reverse: true,
                         itemCount: snapshot.data!.docs.length,
                         itemBuilder: (context, index) {
-                          final message = Message.fromMap(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                          final message = Message.fromMap(
+                              snapshot.data!.docs[index].data()
+                                  as Map<String, dynamic>);
                           return message.isBotMessage
                               ? ReceiverMessage(
-                            text: message.message,
-                            timestamp: message.createdTime!,
-                          )
+                                  text: message.message,
+                                  timestamp: message.createdTime!,
+                                )
                               : SenderMessage(
-                            text: message.message,
-                            timestamp: message.createdTime!,
-                          );
+                                  text: message.message,
+                                  timestamp: message.createdTime!,
+                                );
                         },
                       );
                     }
@@ -444,17 +465,17 @@ class _ChatScreenState extends State<ChatScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('workspaces')
-                  .where("userRef", isEqualTo:UserService().getUserReference())
-                  .orderBy("lastUpdatedTime",descending: true)
+                  .where("userRef", isEqualTo: UserService().getUserReference())
+                  .orderBy("lastUpdatedTime", descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
-                }else if (snapshot.hasError) {
+                } else if (snapshot.hasError) {
                   return const Center(child: Text('Error fetching data'));
-                }else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return const NothingToShow();
-                }else{
+                } else {
                   if (snapshot.data!.docs.isEmpty) {
                     return const NothingToShow();
                   }
@@ -468,8 +489,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           decoration: BoxDecoration(
-                            color:
-                            currentUser?.primaryWorkSpace == doc.reference.id
+                            color: currentUser?.primaryWorkSpace ==
+                                    doc.reference.id
                                 ? const Color(0Xff39d2c0).withAlpha(100)
                                 : Colors.transparent,
                           ),
@@ -500,10 +521,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 size: 15,
                               ),
                               title: Text(
-                                    doc["name"]
-                                    .toString()
-                                    .capitalize() ??
-                                    "",
+                                doc["name"].toString().capitalize() ?? "",
                               ),
                             ),
                           ),

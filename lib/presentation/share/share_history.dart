@@ -1,21 +1,21 @@
+import 'package:chatbot_text_tool/presentation/chat/shared_chat_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../models/shared_history.dart';
+import '../common/nothing_to_show.dart';
+
 class ShareHistoryScreen extends StatefulWidget {
   final String workspaceColor;
-  ShareHistoryScreen({super.key, required this.workspaceColor});
+
+  const ShareHistoryScreen({super.key, required this.workspaceColor});
 
   @override
   State<ShareHistoryScreen> createState() => _ShareHistoryScreenState();
 }
 
 class _ShareHistoryScreenState extends State<ShareHistoryScreen> {
-  final List<SharedHistory> _sharedHistories = [
-    SharedHistory(name: 'John Doe', email: 'john@example.com', createdDate: DateTime.now(), enabled: true),
-    SharedHistory(name: 'Jane Smith', email: 'jane@example.com', createdDate: DateTime.now(), enabled: false),
-    // Add more items as needed
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,16 +26,47 @@ class _ShareHistoryScreenState extends State<ShareHistoryScreen> {
         title: const Text('Shared History'),
       ),
       body: Container(
-        margin: EdgeInsets.only(top: 10),
-        child: ListView.builder(
-          itemCount: _sharedHistories.length,
-          itemBuilder: (context, index) {
-            return SharedHistoryItem(
-              sharedHistory: _sharedHistories[index],
-              onToggleEnabled: () {
-                setState(() {
-                  _sharedHistories[index].enabled = !_sharedHistories[index].enabled;
-                });
+        margin: const EdgeInsets.only(top: 10),
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('shared_chats')
+              .orderBy("modifiedAt", descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return const Center(child: Text('Error fetching data'));
+            } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const NothingToShow();
+            }
+
+            final sharedHistories = snapshot.data!.docs.map((doc) {
+              return SharedHistory(
+                name: doc['clientName'],
+                email: doc['clientEmail'],
+                createdDate: (doc['createdAt'] as Timestamp).toDate(),
+                enabled: doc['status'],
+              );
+            }).toList();
+
+            return ListView.builder(
+              itemCount: sharedHistories.length,
+              itemBuilder: (context, index) {
+                final sharedHistory = sharedHistories[index];
+
+                return _sharedHistoryItem(
+                  sharedHistory: sharedHistory,
+                  onToggleEnabled: () {
+                    setState((){
+                        FirebaseFirestore.instance
+                            .collection('shared_chats')
+                            .doc(snapshot.data!.docs[index].id)
+                            .update({'status': !sharedHistory.enabled});
+                      },
+                    );
+                  },
+                );
               },
             );
           },
@@ -45,32 +76,17 @@ class _ShareHistoryScreenState extends State<ShareHistoryScreen> {
   }
 }
 
-class SharedHistory {
-  final String name;
-  final String email;
-  final DateTime createdDate;
-  bool enabled;
-
-  SharedHistory({
-    required this.name,
-    required this.email,
-    required this.createdDate,
-    this.enabled = false,
-  });
-}
-
 extension ReadableFormat on DateTime {
   String toReadableFormat() {
     return DateFormat('MM-dd-yyyy').format(this);
   }
 }
 
-class SharedHistoryItem extends StatelessWidget {
+class _sharedHistoryItem extends StatelessWidget {
   final SharedHistory sharedHistory;
   final VoidCallback onToggleEnabled;
-  DateTime dateTime = DateTime.parse("2024-07-11T18:17:23.603");
 
-  SharedHistoryItem({
+  _sharedHistoryItem({
     required this.sharedHistory,
     required this.onToggleEnabled,
   });
@@ -83,71 +99,84 @@ class SharedHistoryItem extends StatelessWidget {
         color: Colors.grey[300],
         borderRadius: const BorderRadius.all(Radius.circular(8)),
       ),
-      child: Container(
-        padding: EdgeInsets.all(6),
-        child: ListTile(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      style: DefaultTextStyle.of(context).style,
-                      children: [
-                        TextSpan(
-                          text: 'Name: ',
-                          style: TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                        TextSpan(
-                          text: sharedHistory.name,
-                        ),
-                      ],
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SharedChatScreen()),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          child: ListTile(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        style: DefaultTextStyle.of(context).style,
+                        children: [
+                          const TextSpan(
+                            text: 'Name: ',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          TextSpan(
+                            text: sharedHistory.name,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  RichText(
-                    text: TextSpan(
-                      style: DefaultTextStyle.of(context).style,
-                      children: [
-                        TextSpan(
-                          text: 'Email: ',
-                          style: TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                        TextSpan(
-                          text: sharedHistory.email,
-                        ),
-                      ],
+                    RichText(
+                      text: TextSpan(
+                        style: DefaultTextStyle.of(context).style,
+                        children: [
+                          const TextSpan(
+                            text: 'Email: ',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          TextSpan(
+                            text: sharedHistory.email,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  RichText(
-                    text: TextSpan(
-                      style: DefaultTextStyle.of(context).style,
-                      children: [
-                        TextSpan(
-                          text: 'Created Date: ',
-                          style: TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                        TextSpan(
-                          text:dateTime.toReadableFormat(),
-                        ),
-                      ],
+                    RichText(
+                      text: TextSpan(
+                        style: DefaultTextStyle.of(context).style,
+                        children: [
+                          const TextSpan(
+                            text: 'Created Date: ',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          TextSpan(
+                            text: sharedHistory.createdDate.toReadableFormat(),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      sharedHistory.enabled ? Icons.check_box : Icons.check_box_outline_blank,
+                  ],
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        sharedHistory.enabled
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank,
+                      ),
+                      onPressed: onToggleEnabled,
                     ),
-                    onPressed: onToggleEnabled,
-                  ),
-                  Text('Enable',style: TextStyle(fontSize: 15),),
-                ],
-              ),
-            ],
+                    const Text(
+                      'Enable',
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

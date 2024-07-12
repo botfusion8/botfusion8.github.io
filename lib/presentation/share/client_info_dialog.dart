@@ -1,7 +1,15 @@
+import 'package:chatbot_text_tool/models/shared_chat.dart';
+import 'package:chatbot_text_tool/utils/custom_snackbar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class ClientInfoDialog extends StatefulWidget {
+  final String currentWorkspace;
+
+  const ClientInfoDialog({Key? key, required this.currentWorkspace})
+      : super(key: key);
+
   @override
   _ClientInfoDialogState createState() => _ClientInfoDialogState();
 }
@@ -13,8 +21,38 @@ class _ClientInfoDialogState extends State<ClientInfoDialog> {
 
   void _generateLink() {
     setState(() {
-      _generatedLink = 'https://slammie.com/client?name=${_nameController.text}&email=${_emailController.text}';
+      _generatedLink =
+      'https://slammie.com/client?name=${_nameController.text}&email=${_emailController.text}';
     });
+  }
+
+  Future<void> _addSharedChat() async {
+    if (_nameController.text.isEmpty || _emailController.text.isEmpty) {
+      context.showCustomSnackBar('Name and Email cannot be empty!');
+      return;
+    }
+
+    final sharedChat = SharedChat(
+        clientName: _nameController.text,
+        clientEmail: _emailController.text,
+        createdAt: Timestamp.now(),
+        modifiedAt: Timestamp.now(),
+        workspaceRef: widget.currentWorkspace,
+        status: false);
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('shared_chats')
+          .add(sharedChat.toMap());
+      _nameController.clear();
+      _emailController.clear();
+      Navigator.pop(context);
+      context.showCustomSnackBar('Chat stored successfully!');
+      debugPrint('Chat stored successfully!');
+    } catch (e) {
+      debugPrint('Error sending message: $e');
+      context.showCustomSnackBar('$e');
+    }
   }
 
   void _copyLink() {
@@ -43,7 +81,10 @@ class _ClientInfoDialogState extends State<ClientInfoDialog> {
             ),
             const SizedBox(height: 20),
             InkWell(
-              onTap: _generateLink,
+              onTap: () {
+                _generateLink();
+                _addSharedChat();
+              },
               child: Container(
                 height: 35,
                 alignment: Alignment.center,
