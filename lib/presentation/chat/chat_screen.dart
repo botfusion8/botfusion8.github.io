@@ -409,7 +409,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   const Icon(Icons.bug_report, size: 60, color: Colors.white),
                   const SizedBox(height: 10),
                   Text(
-                    'ChatTestify',
+                    'BotFusion',
                     style: GoogleFonts.playball(
                       color: Colors.white,
                       fontSize: 26,

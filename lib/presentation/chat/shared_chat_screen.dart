@@ -72,7 +72,6 @@ class _SharedChatScreenState extends State<SharedChatScreen> {
             "token":"vWxybfzjsUPjB2i4+/uoLrC6BMxvfXUD71o8hZWnf9Y=",
             "type":"Bearer"
           });
-      print("resultResponse $result");
       setState(() async {
         response = result;
         final messageData = SharedChatMessage(
