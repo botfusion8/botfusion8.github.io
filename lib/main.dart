@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_strategy/url_strategy.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +21,7 @@ Future main() async {
         ));
   }
   await Firebase.initializeApp();
+  setPathUrlStrategy(); // Configure URL strategy for Flutter web
   runApp(const MyApp());
 }
 
@@ -31,27 +33,20 @@ class MyApp extends StatelessWidget {
     return FutureBuilder<bool>(
       future: _checkLoginStatus(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-          );
-        } else {
-          bool isLoggedIn = snapshot.data ?? false;
-          return MaterialApp(
-            title: 'Flutter Demo',
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-              useMaterial3: true,
-            ),
-            home: isLoggedIn ? const ChatScreen() : const LoginScreen(),
-            onGenerateRoute: (settings) {
+        bool isLoggedIn = snapshot.data ?? false;
+        return MaterialApp(
+          title: 'BotFusion',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+          ),
+          initialRoute: '/',
+          onGenerateRoute: (settings) {
+            if (settings.name != null) {
               final Uri uri = Uri.parse(settings.name!);
-              if (uri.pathSegments.length == 1 && uri.pathSegments.first == 'shared-chat') {
+              if (uri.pathSegments.length == 1 &&
+                  uri.pathSegments.first == 'shared-chat') {
                 final String? token = uri.queryParameters['token'];
                 if (token != null) {
                   return MaterialPageRoute(
@@ -59,14 +54,17 @@ class MyApp extends StatelessWidget {
                   );
                 }
               }
-              return null;
-            },
-            routes: {
-              '/login': (context) => const LoginScreen(),
-            },
-          );
-        }
-      },
+            }
+            return MaterialPageRoute(
+              builder: (context) => HomeScreen(isLoggedIn: isLoggedIn),
+            );
+          },
+          routes: {
+            '/login': (context) => const LoginScreen(),
+            '/chat': (context) => const ChatScreen(),
+          },
+        );
+      }
     );
   }
 
@@ -74,5 +72,16 @@ class MyApp extends StatelessWidget {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? uid = prefs.getString('uid');
     return uid != null && uid.isNotEmpty;
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  final bool isLoggedIn;
+
+  const HomeScreen({super.key, required this.isLoggedIn});
+
+  @override
+  Widget build(BuildContext context) {
+    return isLoggedIn ? const ChatScreen() : const LoginScreen();
   }
 }

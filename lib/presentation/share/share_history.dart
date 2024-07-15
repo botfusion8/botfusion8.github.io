@@ -1,6 +1,7 @@
 import 'package:chatbot_text_tool/presentation/share/shared_chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/shared_history.dart';
@@ -81,6 +82,7 @@ class _sharedHistoryItem extends StatelessWidget {
     required this.onToggleEnabled,
   });
 
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -152,6 +154,16 @@ class _sharedHistoryItem extends StatelessWidget {
                 Row(
                   children: [
                     IconButton(
+                      icon: const Icon(Icons.copy),
+                      onPressed: (){
+                        Clipboard.setData(ClipboardData(text: 'https://botfusion8.github.io/shared-chat?token=${sharedHistory.id}'));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Link copied to clipboard')),
+                        );
+                      },
+                    ),
+                    SizedBox(width: 10,),
+                    IconButton(
                       icon: Icon(
                         sharedHistory.enabled
                             ? Icons.check_box
@@ -172,4 +184,6 @@ class _sharedHistoryItem extends StatelessWidget {
       ),
     );
   }
+
+
 }

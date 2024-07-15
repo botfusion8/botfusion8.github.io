@@ -1,6 +1,7 @@
 import 'package:chatbot_text_tool/models/shared_chat_message.dart';
 import 'package:chatbot_text_tool/presentation/chat/receiver_message.dart';
 import 'package:chatbot_text_tool/presentation/chat/sender_message.dart';
+import 'package:chatbot_text_tool/presentation/common/nothing_to_show.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +15,7 @@ class SharedChatScreen extends StatefulWidget {
 
   final bool fromDashboard;
   final String? token;
-  const SharedChatScreen({super.key, this.fromDashboard = false,required this.token});
+  const SharedChatScreen({super.key, this.fromDashboard = false, this.token});
 
   @override
   State<SharedChatScreen> createState() => _SharedChatScreenState();
@@ -29,27 +30,38 @@ class _SharedChatScreenState extends State<SharedChatScreen> {
   late ApiService apiService;
   bool isLoading = false;
   String errorMessage = '';
-  late DocumentSnapshot<Object?>? currentWorkspace;
-  //late DocumentSnapshot<Object?>? currentSharedChat;
-  Map<String, dynamic> currentSharedChat = {};
+  Map<String,dynamic>? currentWorkSpace= {};
 
   @override
-  void initState() {
+  void initState(){
     _getCurrentUser();
     apiService = ApiService();
-    _getCurrentSharedChat();
     super.initState();
   }
 
 
-  Future<void> _getCurrentSharedChat() async{
-    setState(() async{
+  Future<Map<String, dynamic>?> _getCurrentSharedChat() async{
+      try{
+        final result=  await FirebaseFirestore.instance
+            .collection('shared_chats')
+            .doc(widget.token)
+            .get();
+        return result.data();
+      }catch(e){
+        return null;
+      }
+  }
+
+  Future<Map<String, dynamic>?> _getCurrentWorkSpace(String id) async{
+    try{
       final result=  await FirebaseFirestore.instance
-          .collection('shared_chat')
-          .doc(widget.token)
+          .collection('workspaces')
+          .doc(id)
           .get();
-      currentSharedChat =  result.data() as Map<String,dynamic>;
-    });
+      return result.data();
+    }catch(e){
+      return null;
+    }
   }
 
   Future<void> _getCurrentUser() async {
@@ -67,12 +79,8 @@ class _SharedChatScreenState extends State<SharedChatScreen> {
 
     try {
        final response = await apiService.slammieChatBot(message,
-          url: "https://fusionflow.maslow.ai/api/v1/prediction/4bddea5e-c392-4dbe-bd05-3ef2aa60942d",
-          authentication:{
-             "key" : "Authorization",
-            "token":"vWxybfzjsUPjB2i4+/uoLrC6BMxvfXUD71o8hZWnf9Y=",
-            "type":"Bearer"
-          });
+          url: currentWorkSpace?['url'],
+          authentication: currentWorkSpace?['authentication']);
 
         final messageData = SharedChatMessage(
           message: response.text ?? "",
@@ -130,79 +138,113 @@ class _SharedChatScreenState extends State<SharedChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 5,
-        centerTitle: true,
-        title: const Text('Shared Chat'),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _chatCollection
-              .where("sharedChatId", isEqualTo: widget.token ?? "")
-                  .orderBy('createdTime', descending: false).snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
 
-                final messages = snapshot.data!.docs.map((doc) {
-                  return SharedChatMessage.fromMap(doc.data() as Map<String, dynamic>);
-                }).toList();
+    return FutureBuilder(future: _getCurrentSharedChat(), builder: (context, currentSharedChatObj){
+      return currentSharedChatObj.data != null ? FutureBuilder(
+          future: _getCurrentWorkSpace(currentSharedChatObj.data?['workspaceRef'] ?? ""),
+          builder: (context, currentWorkSpaceObj){
+            currentWorkSpace = currentWorkSpaceObj.data;
+            final workSpaceColor = currentWorkSpaceObj.data?["workSpaceColor"] ?? "0xFF000000";
 
-                return ListView.builder(
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    if (!message.isBotMessage) {
-                      return SenderMessage(
-                        text: message.message,
-                        timestamp: message.createdTime!,
-                      );
-                    } else {
-                      return ReceiverMessage(
-                        text: message.message,
-                        timestamp: message.createdTime!,
-                      );
-                    }
-                  },
-                );
-              },
-            ),
-          ),
-          if (!widget.fromDashboard &&
-              (widget.token != null && widget.token?.isNotEmpty == true) &&
-              currentSharedChat['status'] == true)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
+            return currentSharedChatObj.data != null ?
+            Scaffold(
+              appBar: AppBar(
+                elevation: 5,
+                centerTitle: true,
+                backgroundColor: Color(int.parse(workSpaceColor)),
+                title: Text(currentWorkSpaceObj.data?['name'] ?? "Shared Chat"),
+              ),
+              body: Column(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: 'Type a message...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      onSubmitted: (value) {
-                        sendMessage();
-                      },
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: _chatCollection
+                          .where("sharedChatId", isEqualTo: widget.token ?? "")
+                          .orderBy('createdTime', descending: true)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else if (snapshot.hasError) {
+                            return  Center(
+                              child: Text('Error fetching data ${snapshot.error}'),
+                            );
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.docs.isEmpty) {
+                            return const Center(
+                              child: Text('No messages to show'),
+                            );
+                          } else {
+                            final messages =
+                                snapshot.data!.docs.map((doc) {
+                              return SharedChatMessage.fromMap(doc
+                                  .data() as Map<String, dynamic>);
+                            }).toList();
+
+                            return ListView.builder(
+                              reverse: true,
+                              itemCount: messages.length,
+                              itemBuilder: (context, index) {
+                                final message = messages[index];
+                                if (!message.isBotMessage) {
+                                  return SenderMessage(
+                                    text: message.message,
+                                    timestamp: message.createdTime!,
+                                  );
+                                } else {
+                                  return ReceiverMessage(
+                                    text: message.message,
+                                    timestamp: message.createdTime!,
+                                  );
+                                }
+                              },
+                            );
+                          }
+                        },
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  FloatingActionButton(
-                    onPressed: sendMessage,
-                    child: const Icon(Icons.send),
-                  ),
+                  if (!widget.fromDashboard &&
+                      (widget.token != null && widget.token?.isNotEmpty == true) &&
+                      currentSharedChatObj.data?['status'] == true
+                      && currentWorkSpaceObj.data?['url'] != null
+                  )
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _controller,
+                              decoration: InputDecoration(
+                                hintText: 'Type a message...',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              onSubmitted: (value) {
+                                sendMessage();
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          FloatingActionButton(
+                            onPressed: sendMessage,
+                            child: const Icon(Icons.send),
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
-            ),
-        ],
-      ),
-    );
+            ): const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+      ) : const Center(
+        child: CircularProgressIndicator(),
+      );
+    });
   }
 }

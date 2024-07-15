@@ -19,10 +19,10 @@ class SharedHistory {
     Map data = doc.data() as Map<String, dynamic>;
     return SharedHistory(
       id: doc.id,
-      name: data['name'] ?? '',
-      email: data['email'] ?? '',
-      createdDate: (data['createdDate'] as Timestamp).toDate(),
-      enabled: data['enabled'] ?? false,
+      name: data['clientName'] ?? '',
+      email: data['clientEmail'] ?? '',
+      createdDate: (data['createdAt'] as Timestamp).toDate(),
+      enabled: data['status'] ?? false,
     );
   }
 }

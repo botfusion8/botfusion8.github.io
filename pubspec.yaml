@@ -53,6 +53,7 @@ dependencies:
   flutter_markdown: ^0.7.3
   image_cropper: ^7.1.0
   uri:
+  url_strategy:
 
 
 dev_dependencies:
