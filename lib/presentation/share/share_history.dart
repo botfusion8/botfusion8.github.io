@@ -1,4 +1,4 @@
-import 'package:chatbot_text_tool/presentation/chat/shared_chat_screen.dart';
+import 'package:chatbot_text_tool/presentation/share/shared_chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -8,8 +8,9 @@ import '../common/nothing_to_show.dart';
 
 class ShareHistoryScreen extends StatefulWidget {
   final String workspaceColor;
+  final String workSpaceId;
 
-  const ShareHistoryScreen({super.key, required this.workspaceColor});
+  const ShareHistoryScreen({super.key, required this.workspaceColor, required this.workSpaceId});
 
   @override
   State<ShareHistoryScreen> createState() => _ShareHistoryScreenState();
@@ -30,6 +31,7 @@ class _ShareHistoryScreenState extends State<ShareHistoryScreen> {
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('shared_chats')
+              .where("workspaceRef",isEqualTo: widget.workSpaceId)
               .orderBy("modifiedAt", descending: true)
               .snapshots(),
           builder: (context, snapshot) {
@@ -40,31 +42,19 @@ class _ShareHistoryScreenState extends State<ShareHistoryScreen> {
             } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return const NothingToShow();
             }
-
-            final sharedHistories = snapshot.data!.docs.map((doc) {
-              return SharedHistory(
-                name: doc['clientName'],
-                email: doc['clientEmail'],
-                createdDate: (doc['createdAt'] as Timestamp).toDate(),
-                enabled: doc['status'],
-              );
-            }).toList();
-
             return ListView.builder(
-              itemCount: sharedHistories.length,
+              itemCount: snapshot.data!.docs.length,
               itemBuilder: (context, index) {
-                final sharedHistory = sharedHistories[index];
+                final sharedHistoryObj = snapshot.data!.docs[index];
+                final sharedHistory = SharedHistory.fromFirestore(sharedHistoryObj);
 
                 return _sharedHistoryItem(
                   sharedHistory: sharedHistory,
-                  onToggleEnabled: () {
-                    setState((){
-                        FirebaseFirestore.instance
-                            .collection('shared_chats')
-                            .doc(snapshot.data!.docs[index].id)
-                            .update({'status': !sharedHistory.enabled});
-                      },
-                    );
+                  onToggleEnabled: () async{
+                      FirebaseFirestore.instance
+                          .collection('shared_chats')
+                          .doc(snapshot.data!.docs[index].id)
+                          .update({'status': !sharedHistory.enabled});
                   },
                 );
               },
@@ -103,7 +93,7 @@ class _sharedHistoryItem extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const SharedChatScreen()),
+            MaterialPageRoute(builder: (context) => SharedChatScreen(fromDashboard: true,token: sharedHistory.id)),
           );
         },
         child: Container(

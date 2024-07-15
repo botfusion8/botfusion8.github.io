@@ -11,7 +11,10 @@ import '../../service/shared_pref_service.dart';
 import '../../service/user_service.dart';
 
 class SharedChatScreen extends StatefulWidget {
-  const SharedChatScreen({super.key});
+
+  final bool fromDashboard;
+  final String? token;
+  const SharedChatScreen({super.key, this.fromDashboard = false,required this.token});
 
   @override
   State<SharedChatScreen> createState() => _SharedChatScreenState();
@@ -24,7 +27,6 @@ class _SharedChatScreenState extends State<SharedChatScreen> {
 
   UserModel? currentUser;
   late ApiService apiService;
-  SlammieBotResponse? response;
   bool isLoading = false;
   String errorMessage = '';
   late DocumentSnapshot<Object?>? currentWorkspace;
@@ -44,7 +46,7 @@ class _SharedChatScreenState extends State<SharedChatScreen> {
     setState(() async{
       final result=  await FirebaseFirestore.instance
           .collection('shared_chat')
-          .doc('wRgioe5YwAbtOIzEavHx')
+          .doc(widget.token)
           .get();
       currentSharedChat =  result.data() as Map<String,dynamic>;
     });
@@ -64,22 +66,20 @@ class _SharedChatScreenState extends State<SharedChatScreen> {
     });
 
     try {
-
-      final result = await apiService.slammieChatBot(message,
+       final response = await apiService.slammieChatBot(message,
           url: "https://fusionflow.maslow.ai/api/v1/prediction/4bddea5e-c392-4dbe-bd05-3ef2aa60942d",
           authentication:{
              "key" : "Authorization",
             "token":"vWxybfzjsUPjB2i4+/uoLrC6BMxvfXUD71o8hZWnf9Y=",
             "type":"Bearer"
           });
-      setState(() async {
-        response = result;
+
         final messageData = SharedChatMessage(
-          message: response?.text ?? "",
+          message: response.text ?? "",
           createdTime: Timestamp.now(),
           createdBy: UserService().getUserReference(),
           isBotMessage: true,
-          sharedChatId: 'wRgioe5YwAbtOIzEavHx',
+          sharedChatId: widget.token ?? "",
         );
 
         try {
@@ -90,7 +90,6 @@ class _SharedChatScreenState extends State<SharedChatScreen> {
         } catch (e) {
           debugPrint('Error sending message: $e');
         }
-      });
     } catch (error) {
       setState(() {
         errorMessage = error.toString();
@@ -114,7 +113,7 @@ class _SharedChatScreenState extends State<SharedChatScreen> {
       createdTime: Timestamp.now(),
       createdBy: UserService().getUserReference(),
       isBotMessage: false,
-      sharedChatId: 'wRgioe5YwAbtOIzEavHx',
+      sharedChatId: widget.token ?? "",
     );
 
     try {
@@ -141,7 +140,9 @@ class _SharedChatScreenState extends State<SharedChatScreen> {
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _chatCollection.orderBy('createdTime', descending: false).snapshots(),
+              stream: _chatCollection
+              .where("sharedChatId", isEqualTo: widget.token ?? "")
+                  .orderBy('createdTime', descending: false).snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
@@ -171,32 +172,35 @@ class _SharedChatScreenState extends State<SharedChatScreen> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: 'Type a message...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
+          if (!widget.fromDashboard &&
+              (widget.token != null && widget.token?.isNotEmpty == true) &&
+              currentSharedChat['status'] == true)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        hintText: 'Type a message...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                       ),
+                      onSubmitted: (value) {
+                        sendMessage();
+                      },
                     ),
-                    onSubmitted: (value) {
-                      sendMessage();
-                    },
                   ),
-                ),
-                const SizedBox(width: 10),
-                FloatingActionButton(
-                  onPressed: sendMessage,
-                  child: const Icon(Icons.send),
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  FloatingActionButton(
+                    onPressed: sendMessage,
+                    child: const Icon(Icons.send),
+                  ),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

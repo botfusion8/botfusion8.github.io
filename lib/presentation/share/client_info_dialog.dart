@@ -19,13 +19,6 @@ class _ClientInfoDialogState extends State<ClientInfoDialog> {
   final TextEditingController _emailController = TextEditingController();
   String _generatedLink = '';
 
-  void _generateLink() {
-    setState(() {
-      _generatedLink =
-      'https://slammie.com/client?name=${_nameController.text}&email=${_emailController.text}';
-    });
-  }
-
   Future<void> _addSharedChat() async {
     if (_nameController.text.isEmpty || _emailController.text.isEmpty) {
       context.showCustomSnackBar('Name and Email cannot be empty!');
@@ -38,19 +31,20 @@ class _ClientInfoDialogState extends State<ClientInfoDialog> {
         createdAt: Timestamp.now(),
         modifiedAt: Timestamp.now(),
         workspaceRef: widget.currentWorkspace,
-        status: false);
+        status: true);
 
     try {
-      await FirebaseFirestore.instance
+      final result = await FirebaseFirestore.instance
           .collection('shared_chats')
           .add(sharedChat.toMap());
       _nameController.clear();
       _emailController.clear();
-      Navigator.pop(context);
-      context.showCustomSnackBar('Chat stored successfully!');
-      debugPrint('Chat stored successfully!');
+      setState(() {
+        _generatedLink = 'https://botfusion8.github.io/shared-chat?token=${result.id}';
+      });
+
+      context.showCustomSnackBar('Share link created successfully!');
     } catch (e) {
-      debugPrint('Error sending message: $e');
       context.showCustomSnackBar('$e');
     }
   }
@@ -82,15 +76,17 @@ class _ClientInfoDialogState extends State<ClientInfoDialog> {
             const SizedBox(height: 20),
             InkWell(
               onTap: () {
-                _generateLink();
-                _addSharedChat();
+                if(_generatedLink.isEmpty){
+                  _addSharedChat();
+                }
               },
               child: Container(
                 height: 35,
                 alignment: Alignment.center,
                 width: 150,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF39D2C0),
+                  color:_generatedLink.isEmpty ? const Color(0xFF39D2C0) : const Color(
+                      0xFFBDFCEE),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.2),

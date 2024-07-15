@@ -10,8 +10,6 @@ import 'package:chatbot_text_tool/utils/captalize_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../models/slammie_bot_response.dart';
 import '../../service/ApiService.dart';
 import '../../service/shared_pref_service.dart';
 import '../../service/user_service.dart';
@@ -29,7 +27,6 @@ class _ChatScreenState extends State<ChatScreen> {
   UserModel? currentUser;
   final TextEditingController _controller = TextEditingController();
   late ApiService apiService;
-  SlammieBotResponse? response;
   bool isLoading = false;
   String errorMessage = '';
   late DocumentSnapshot<Object?>? currentWorkspace;
@@ -51,17 +48,16 @@ class _ChatScreenState extends State<ChatScreen> {
       final workspaceData = currentWorkspace!.data() as Map<String, dynamic>;
       debugPrint('${workspaceData.containsKey('chatId')} workspace Data list');
 
-      final result = await apiService.slammieChatBot(message,
+      final response = await apiService.slammieChatBot(message,
           url: currentWorkspace?['url'],
           authentication: currentWorkspace?['authentication'],
           sessionId: workspaceData.containsKey('chatId')
               ? currentWorkspace!['chatId']
               : '');
-      setState(() async {
-        response = result;
+
         final messageData = Message(
-          chatId: response?.chatId ?? "",
-          message: response?.text ?? "",
+          chatId: response.chatId ?? "",
+          message: response.text ?? "",
           createdTime: Timestamp.now(),
           chatSessionRef: currentUser?.primaryWorkSpace,
           createdBy: UserService().getUserReference(),
@@ -77,14 +73,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
           if (!workspaceData.containsKey('chatId')) {
             await currentWorkspace!.reference.update({
-              'chatId': response?.chatId ?? "",
+              'chatId': response.chatId ?? "",
             });
             debugPrint('Key updated successfully!');
           }
         } catch (e) {
           debugPrint('Error sending message: $e');
         }
-      });
     } catch (error) {
       setState(() {
         errorMessage = error.toString();
@@ -176,6 +171,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       MaterialPageRoute(
                         builder: (context) => ShareHistoryScreen(
                           workspaceColor: snapshot.data?['workSpaceColor'],
+                          workSpaceId: snapshot.data?.id ?? "",
                         ),
                       ),
                     );

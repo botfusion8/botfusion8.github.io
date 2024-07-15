@@ -1,5 +1,6 @@
 import 'package:chatbot_text_tool/presentation/auth/login.dart';
 import 'package:chatbot_text_tool/presentation/chat/chat_screen.dart';
+import 'package:chatbot_text_tool/presentation/share/shared_chat_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +49,18 @@ class MyApp extends StatelessWidget {
               useMaterial3: true,
             ),
             home: isLoggedIn ? const ChatScreen() : const LoginScreen(),
+            onGenerateRoute: (settings) {
+              final Uri uri = Uri.parse(settings.name!);
+              if (uri.pathSegments.length == 1 && uri.pathSegments.first == 'shared-chat') {
+                final String? token = uri.queryParameters['token'];
+                if (token != null) {
+                  return MaterialPageRoute(
+                    builder: (context) => SharedChatScreen(token: token),
+                  );
+                }
+              }
+              return null;
+            },
             routes: {
               '/login': (context) => const LoginScreen(),
             },
