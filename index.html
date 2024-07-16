@@ -34,21 +34,6 @@
 </head>
 <body>
 <script src="flutter_bootstrap.js" async></script>
-<script>
-
-// Check if the current URL matches a known path
-      if (location.pathname !== '/' && !location.pathname.startsWith('/index.html')) {
-        // Redirect to the root path
-        location.replace(location.origin + '/?' + location.pathname.substr(1) + location.search);
-      }
-
-<!--window.onload = function() {-->
-<!--  const urlParams = new URLSearchParams(window.location.search);-->
-<!--  const redirectPath = urlParams.get('redirect');-->
-<!--  if (redirectPath) {-->
-<!--    window.history.replaceState(null, null, redirectPath);-->
-<!--  }-->
-<!--};-->
-  </script>
+<script src="main.dart.js"></script>
 </body>
 </html>
