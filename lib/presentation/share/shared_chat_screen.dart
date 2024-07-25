@@ -2,6 +2,7 @@ import 'package:chatbot_text_tool/models/shared_chat_message.dart';
 import 'package:chatbot_text_tool/presentation/chat/receiver_message.dart';
 import 'package:chatbot_text_tool/presentation/chat/sender_message.dart';
 import 'package:chatbot_text_tool/presentation/common/nothing_to_show.dart';
+import 'package:chatbot_text_tool/utils/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -154,89 +155,91 @@ class _SharedChatScreenState extends State<SharedChatScreen> {
                 backgroundColor: Color(int.parse(workSpaceColor)),
                 title: Text(currentWorkSpaceObj.data?['name'] ?? "Shared Chat"),
               ),
-              body: Column(
-                children: [
-                  Expanded(
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream: _chatCollection
-                          .where("sharedChatId", isEqualTo: widget.token ?? "")
-                          .orderBy('createdTime', descending: true)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else if (snapshot.hasError) {
-                            return  Center(
-                              child: Text('Error fetching data ${snapshot.error}'),
-                            );
-                          } else if (!snapshot.hasData ||
-                              snapshot.data!.docs.isEmpty) {
-                            return const Center(
-                              child: Text('No messages to show'),
-                            );
-                          } else {
-                            final messages =
-                                snapshot.data!.docs.map((doc) {
-                              return SharedChatMessage.fromMap(doc
-                                  .data() as Map<String, dynamic>);
-                            }).toList();
+              body: Container(color: AppColors.backgroundColor,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: _chatCollection
+                            .where("sharedChatId", isEqualTo: widget.token ?? "")
+                            .orderBy('createdTime', descending: true)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            } else if (snapshot.hasError) {
+                              return  Center(
+                                child: Text('Error fetching data ${snapshot.error}'),
+                              );
+                            } else if (!snapshot.hasData ||
+                                snapshot.data!.docs.isEmpty) {
+                              return const Center(
+                                child: Text('No messages to show'),
+                              );
+                            } else {
+                              final messages =
+                                  snapshot.data!.docs.map((doc) {
+                                return SharedChatMessage.fromMap(doc
+                                    .data() as Map<String, dynamic>);
+                              }).toList();
 
-                            return ListView.builder(
-                              reverse: true,
-                              itemCount: messages.length,
-                              itemBuilder: (context, index) {
-                                final message = messages[index];
-                                if (!message.isBotMessage) {
-                                  return SenderMessage(
-                                    text: message.message,
-                                    timestamp: message.createdTime!,
-                                  );
-                                } else {
-                                  return ReceiverMessage(
-                                    text: message.message,
-                                    timestamp: message.createdTime!,
-                                  );
-                                }
-                              },
-                            );
-                          }
-                        },
-                    ),
-                  ),
-                  if (!widget.fromDashboard &&
-                      (widget.token != null && widget.token?.isNotEmpty == true) &&
-                      currentSharedChatObj.data?['status'] == true
-                      && currentWorkSpaceObj.data?['url'] != null
-                  )
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _controller,
-                              decoration: InputDecoration(
-                                hintText: 'Type a message...',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              onSubmitted: (value) {
-                                sendMessage();
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          FloatingActionButton(
-                            onPressed: sendMessage,
-                            child: const Icon(Icons.send),
-                          ),
-                        ],
+                              return ListView.builder(
+                                reverse: true,
+                                itemCount: messages.length,
+                                itemBuilder: (context, index) {
+                                  final message = messages[index];
+                                  if (!message.isBotMessage) {
+                                    return SenderMessage(
+                                      text: message.message,
+                                      timestamp: message.createdTime!,
+                                    );
+                                  } else {
+                                    return ReceiverMessage(
+                                      text: message.message,
+                                      timestamp: message.createdTime!,
+                                    );
+                                  }
+                                },
+                              );
+                            }
+                          },
                       ),
                     ),
-                ],
+                    if (!widget.fromDashboard &&
+                        (widget.token != null && widget.token?.isNotEmpty == true) &&
+                        currentSharedChatObj.data?['status'] == true
+                        && currentWorkSpaceObj.data?['url'] != null
+                    )
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _controller,
+                                decoration: InputDecoration(
+                                  hintText: 'Type a message...',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                onSubmitted: (value) {
+                                  sendMessage();
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            FloatingActionButton(
+                              onPressed: sendMessage,
+                              child: const Icon(Icons.send),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ): const Center(
               child: CircularProgressIndicator(),

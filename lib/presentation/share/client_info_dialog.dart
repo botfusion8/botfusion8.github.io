@@ -1,4 +1,5 @@
 import 'package:chatbot_text_tool/models/shared_chat.dart';
+import 'package:chatbot_text_tool/utils/colors.dart';
 import 'package:chatbot_text_tool/utils/custom_snackbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +41,8 @@ class _ClientInfoDialogState extends State<ClientInfoDialog> {
       _nameController.clear();
       _emailController.clear();
       setState(() {
-        _generatedLink = 'https://botfusion8.github.io/shared-chat?token=${result.id}';
+        _generatedLink =
+            'https://botfusion8.github.io/shared-chat?token=${result.id}';
       });
 
       context.showCustomSnackBar('Share link created successfully!');
@@ -62,67 +64,87 @@ class _ClientInfoDialogState extends State<ClientInfoDialog> {
       title: const Text('Client Info'),
       content: SizedBox(
         width: MediaQuery.of(context).size.width / 3,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            const SizedBox(height: 20),
-            InkWell(
-              onTap: () {
-                if(_generatedLink.isEmpty){
-                  _addSharedChat();
-                }
-              },
-              child: Container(
-                height: 35,
-                alignment: Alignment.center,
-                width: 150,
-                decoration: BoxDecoration(
-                  color:_generatedLink.isEmpty ? const Color(0xFF39D2C0) : const Color(
-                      0xFFBDFCEE),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      spreadRadius: 3,
-                      blurRadius: 7,
-                      offset: const Offset(0, 1), // changes position of shadow
+        child: Container(
+          color: AppColors.backgroundColor,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 20,),
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                    labelText: 'Name',
+                    border: OutlineInputBorder(
+                        /*   borderSide:  BorderSide(
+                            color: AppColors.textFieldBorderColor
+                        )*/
+                        )),
+              ),
+              const SizedBox(height: 15,),
+              TextField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(
+                      /*  borderSide:  BorderSide(
+                        color: AppColors.textFieldBorderColor
+                    )*/
+                      ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              InkWell(
+                onTap: () {
+                  if (_generatedLink.isEmpty) {
+                    _addSharedChat();
+                  }
+                },
+                child: Container(
+                  height: 35,
+                  alignment: Alignment.center,
+                  width: 150,
+                  decoration: BoxDecoration(
+                    color: _generatedLink.isEmpty
+                        ? AppColors.primaryColor
+                        : AppColors.primaryColor.withAlpha(100),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 3,
+                        blurRadius: 7,
+                        offset:
+                            const Offset(0, 1), // changes position of shadow
+                      ),
+                    ],
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(10),
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(5),
+                  child: const Text(
+                    'Generate Link',
+                    style: TextStyle(fontSize: 15, color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              if (_generatedLink.isNotEmpty)
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _generatedLink,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.copy),
+                      onPressed: _copyLink,
                     ),
                   ],
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(10),
-                  ),
                 ),
-                padding: const EdgeInsets.all(5),
-                child: const Text(
-                  'Generate Link',
-                  style: TextStyle(fontSize: 15, color: Colors.white),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            if (_generatedLink.isNotEmpty)
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _generatedLink,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.copy),
-                    onPressed: _copyLink,
-                  ),
-                ],
-              ),
-          ],
+            ],
+          ),
         ),
       ),
       actions: [

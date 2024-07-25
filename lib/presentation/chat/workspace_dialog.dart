@@ -12,6 +12,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:image_cropper/image_cropper.dart';
 
 import '../../service/shared_pref_service.dart';
+import '../../utils/colors.dart';
 import '../common/key_value_list.dart';
 import '../common/nothing_to_show.dart';
 
@@ -39,8 +40,10 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
   final TextEditingController _tokenHeader = TextEditingController();
-  final TextEditingController _authHeaderKeyController = TextEditingController();
-  final TextEditingController _confirmDeleteController = TextEditingController();
+  final TextEditingController _authHeaderKeyController =
+      TextEditingController();
+  final TextEditingController _confirmDeleteController =
+      TextEditingController();
 
   var headerKeyValues = [
     const MapEntry('key1', 'value1'),
@@ -114,13 +117,13 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
     // if(cropImage != null){
     //  final bytes = await cropImage.readAsBytes();
     //  final fileBytes = bytes;
-    if(pickedImageBytes != null){
-      final fileName = "${UserService().getUserReference().id}_${Timestamp.now()}";
+    if (pickedImageBytes != null) {
+      final fileName =
+          "${UserService().getUserReference().id}_${Timestamp.now()}";
       _uploadImageToFirebase(pickedImageBytes, fileName);
     }
     //}
   }
-
 
   Future<CroppedFile?> _cropImage(String? pickedFile) async {
     if (pickedFile != null) {
@@ -189,10 +192,10 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
       'createdTime': Timestamp.now(),
       'lastUpdatedTime': Timestamp.now(),
       'authentication': {
-          "key":authHeaderKey,
-          "token":headerToken,
-          "type":selectedTokenType,
-       }
+        "key": authHeaderKey,
+        "token": headerToken,
+        "type": selectedTokenType,
+      }
     });
 
     Navigator.pop(context);
@@ -220,9 +223,9 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
       'workSpaceColor': "0x${selectedWorkspaceColor.toHexString()}",
       'lastUpdatedTime': Timestamp.now(),
       'authentication': {
-        "key":authHeaderKey,
-        "token":headerToken,
-        "type":selectedTokenType,
+        "key": authHeaderKey,
+        "token": headerToken,
+        "type": selectedTokenType,
       }
     });
 
@@ -250,30 +253,28 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
     String? selectedWorkspaceId = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
-
         return AlertDialog(
           title: const Text("Select Primary Workspace"),
           content: StreamBuilder(
-            stream:  FirebaseFirestore.instance
+            stream: FirebaseFirestore.instance
                 .collection('workspaces')
-                .where("userRef", isEqualTo:UserService().getUserReference())
-                .orderBy("lastUpdatedTime",descending: true)
+                .where("userRef", isEqualTo: UserService().getUserReference())
+                .orderBy("lastUpdatedTime", descending: true)
                 .snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
-              }else if (snapshot.connectionState == ConnectionState.waiting) {
+              } else if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
-              }else if(snapshot.data!.docs.isEmpty){
+              } else if (snapshot.data!.docs.isEmpty) {
                 return const NothingToShow();
-              }else{
+              } else {
                 return SizedBox(
                   width: double.minPositive,
                   child: ListView.builder(
                     shrinkWrap: true,
                     itemCount: snapshot.data!.docs.length,
                     itemBuilder: (BuildContext context, int index) {
-
                       final doc = snapshot.data!.docs[index];
 
                       return ListTile(
@@ -293,7 +294,8 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
 
                               Navigator.pushReplacement(
                                 context,
-                                MaterialPageRoute(builder: (context) => const ChatScreen()),
+                                MaterialPageRoute(
+                                    builder: (context) => const ChatScreen()),
                               );
                             } catch (e) {
                               debugPrint("Error updating workspace: $e");
@@ -371,12 +373,18 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
                       children: [
                         TextFormField(
                           controller: _nameController,
-                          decoration: const InputDecoration(labelText: 'Workspace name'),
+                          decoration: const InputDecoration(
+                            labelText: 'Workspace name',
+                            border: OutlineInputBorder(),
+                          ),
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _urlController,
-                          decoration: const InputDecoration(labelText: 'URL'),
+                          decoration: const InputDecoration(
+                            labelText: 'URL',
+                            border: OutlineInputBorder(),
+                          ),
                         ),
                         const SizedBox(height: 25),
                         WorkspaceColor(
@@ -385,7 +393,9 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 50,),
+                  const SizedBox(
+                    width: 50,
+                  ),
                   GestureDetector(
                     onTap: _pickImage,
                     child: Container(
@@ -393,17 +403,18 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
                       width: 150,
                       padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(75),
-                        border: Border.all(color: Colors.grey.withAlpha(100))
-                      ),
+                          borderRadius: BorderRadius.circular(75),
+                          border:
+                              Border.all(color: Colors.grey.withAlpha(100))),
                       child: _imageUrl != null
                           ? Image.network(_imageUrl!,
-                          height: double.infinity,
-                          width: double.infinity,
-                          fit: BoxFit.cover) : const Icon(
-                        Icons.star,
-                        size: 80,
-                      ),
+                              height: double.infinity,
+                              width: double.infinity,
+                              fit: BoxFit.cover)
+                          : const Icon(
+                              Icons.star,
+                              size: 80,
+                            ),
                     ),
                   )
                 ],
@@ -411,16 +422,20 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
               const SizedBox(height: 20),
               Container(
                 decoration: BoxDecoration(
-                    color: Colors.grey.withAlpha(50),
+                    // color: Colors.grey.withAlpha(50),
+                    color: AppColors.messageBgColor,
                     borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Row(
                       children: [
                         Icon(Icons.security),
-                        SizedBox(width: 5,),
+                        SizedBox(
+                          width: 5,
+                        ),
                         Text(
                           "Authorization",
                           style: TextStyle(fontSize: 16),
@@ -437,8 +452,7 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
                           child: TextFormField(
                             controller: _authHeaderKeyController,
                             decoration: const InputDecoration(
-                              hintText: 'Key',
-                            ),
+                                labelText: 'Key', border: OutlineInputBorder()),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -446,10 +460,10 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
                           width: 150,
                           child: InputDecorator(
                             decoration: const InputDecoration(
-                              hintText: 'Token Type',
-                              contentPadding: EdgeInsets.symmetric(vertical: 0),
-                              border: UnderlineInputBorder(),
-                            ),
+                                labelText: 'Token Type',
+                                contentPadding:
+                                    EdgeInsets.symmetric(vertical: 0),
+                                border: OutlineInputBorder()),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 value: selectedTokenType,
@@ -485,8 +499,8 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
                           child: TextFormField(
                             controller: _tokenHeader,
                             decoration: const InputDecoration(
-                                hintText: 'Header Token'
-                            ),
+                                labelText: 'Header Token',
+                                border: OutlineInputBorder()),
                           ),
                         ),
                       ],
@@ -502,7 +516,9 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
                     "Header Values",
                     style: TextStyle(fontSize: 16),
                   ),
-                  const SizedBox(height: 10,),
+                  const SizedBox(
+                    height: 10,
+                  ),
                   KeyValueList(
                     initialPairs: headerKeyValues,
                     onChanged: (pairs) {
@@ -517,10 +533,10 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
               if (_showConfirmDeleteField)
                 Container(
                   decoration: BoxDecoration(
-                    color : Colors.redAccent.withAlpha(50),
-                    borderRadius: BorderRadius.circular(15)
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+                      color: Colors.redAccent.withAlpha(50),
+                      borderRadius: BorderRadius.circular(15)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -533,29 +549,34 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Icon(Icons.delete,color: Colors.black87),
-                              SizedBox(width: 5,),
+                              Icon(Icons.delete, color: Colors.black87),
+                              SizedBox(
+                                width: 5,
+                              ),
                               Text(
                                 "Delete Workspace",
-                                style: TextStyle(fontSize: 16,color: Colors.black87),
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.black87),
                               ),
                             ],
                           ),
-
                           GestureDetector(
-                              onTap: (){
+                              onTap: () {
                                 setState(() {
                                   _showConfirmDeleteField = false;
                                 });
                               },
-                              child: const Icon(Icons.close,color: Colors.black87)
-                          )
+                              child: const Icon(Icons.close,
+                                  color: Colors.black87))
                         ],
                       ),
-                      const SizedBox(height: 15,),
+                      const SizedBox(
+                        height: 15,
+                      ),
                       RichText(
                         text: const TextSpan(
-                          text: "Confirm you want to delete this collection by typing its collection name:",
+                          text:
+                              "Confirm you want to delete this collection by typing its collection name:",
                           style: TextStyle(color: Colors.black54),
                           children: [
                             TextSpan(
@@ -575,15 +596,11 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
                       ),
                       TextFormField(
                         controller: _confirmDeleteController,
-                        style: const TextStyle(
-                          fontSize: 14
-                        ),
+                        style: const TextStyle(fontSize: 14),
                         decoration: const InputDecoration(
-                          hintText: 'Type name of Workspace',
-                          hintStyle: TextStyle(
-                              fontSize: 14,
-                            color: Colors.black54
-                          ),
+                          labelText: 'Type name of Workspace',
+                          hintStyle:
+                              TextStyle(fontSize: 14, color: Colors.black54),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -624,7 +641,9 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
         ),
       ),
       actions: [
-        if (!_showConfirmDeleteField && !(widget.workspaceId == null || widget.workspaceId!.isEmpty == true))
+        if (!_showConfirmDeleteField &&
+            !(widget.workspaceId == null ||
+                widget.workspaceId!.isEmpty == true))
           InkWell(
             onTap: () {
               setState(() {
@@ -636,8 +655,7 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
               padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(40),
-                  border: Border.all(color: Colors.grey.withAlpha(10))
-              ),
+                  border: Border.all(color: Colors.grey.withAlpha(10))),
               child: Row(
                 children: [
                   Icon(
@@ -659,9 +677,10 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: const Text('Cancel', style: TextStyle(
-            color: Colors.black87
-          ),),
+          child: const Text(
+            'Cancel',
+            style: TextStyle(color: Colors.black87),
+          ),
         ),
         InkWell(
           onTap: (widget.workspaceId == null ||
@@ -673,7 +692,7 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
             alignment: Alignment.center,
             width: 80,
             decoration: BoxDecoration(
-              color: const Color(0xFF39D2C0),
+              color: AppColors.primaryColor,
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.2),
@@ -700,7 +719,7 @@ class _WorkspaceDialogState extends State<WorkspaceDialog> {
 
 class CropAspectRatioPresetCustom implements CropAspectRatioPresetData {
   @override
-    (int, int)? get data => (2, 3);
+  (int, int)? get data => (2, 3);
 
   @override
   String get name => '2x3 (customized)';

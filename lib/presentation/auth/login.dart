@@ -1,5 +1,6 @@
 import 'package:chatbot_text_tool/models/user.dart';
 import 'package:chatbot_text_tool/presentation/auth/signup.dart';
+import 'package:chatbot_text_tool/utils/colors.dart';
 import 'package:chatbot_text_tool/utils/custom_snackbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -208,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: 200,
                       decoration: BoxDecoration(
                         //0xFF39D2C0
-                        color: const Color(0xFF39D2C0),
+                        color: AppColors.primaryColor,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.2),
@@ -252,7 +253,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         " Sign up",
                         style: TextStyle(
                             fontSize: 13,
-                            color: Color(0xff39d2c0),
+                            color: AppColors.primaryColor,
                             fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -284,12 +285,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   label: const Text('Sign in with Google'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    foregroundColor: Colors.blue,
+                    foregroundColor: Colors.black,
                     minimumSize: const Size(200.0, 50.0),
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
-                      side: const BorderSide(color: Colors.blue),
+                      side: const BorderSide(color: AppColors.primaryColor),
                     ),
                   ),
                 ),

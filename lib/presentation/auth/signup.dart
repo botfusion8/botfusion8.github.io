@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../utils/colors.dart';
 import '../common/app_logo_horizontal.dart';
 import '../common/password_field.dart';
 
@@ -213,7 +214,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       alignment: Alignment.center,
                       width: 200,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF39D2C0),
+                        color: AppColors.primaryColor,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.2),
@@ -254,7 +255,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       },
                       child: const Text(
                         " Sign in",
-                        style: TextStyle(fontSize: 13, color: Color(0xff39d2c0),fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 13, color: AppColors.primaryColor,fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -272,12 +273,12 @@ class _SignupScreenState extends State<SignupScreen> {
                   label: const Text('Sign in with Google'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    foregroundColor: Colors.blue,
+                    foregroundColor: Colors.black,
                     minimumSize: const Size(200.0, 50.0),
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
-                      side: const BorderSide(color: Colors.blue),
+                      side: const BorderSide(color: AppColors.primaryColor),
                     ),
                   ),
                 ),

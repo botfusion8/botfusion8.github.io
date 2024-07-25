@@ -1,6 +1,8 @@
 import 'package:chatbot_text_tool/presentation/auth/login.dart';
 import 'package:chatbot_text_tool/presentation/chat/chat_screen.dart';
+import 'package:chatbot_text_tool/presentation/settings/settings_screen.dart';
 import 'package:chatbot_text_tool/presentation/share/shared_chat_screen.dart';
+import 'package:chatbot_text_tool/utils/colors.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,12 +23,21 @@ Future main() async {
         ));
   }
   await Firebase.initializeApp();
-  setPathUrlStrategy(); // Configure URL strategy for Flutter web
-  runApp(const MyApp());
+  setPathUrlStrategy();
+  final currentUrl = Uri.base;
+  final redirect = currentUrl.queryParameters['redirect'];
+
+  if (redirect != null && redirect.isNotEmpty) {
+    runApp(MyApp(initialRoute: redirect));
+  } else {
+    runApp(const MyApp());
+  }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+
+  const MyApp({super.key, this.initialRoute = '/'});
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +46,11 @@ class MyApp extends StatelessWidget {
       builder: (context, snapshot) {
         bool isLoggedIn = snapshot.data ?? false;
         return MaterialApp(
-          title: 'BotFusion',
+          title: 'FusionBot',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             useMaterial3: true,
+            primaryColor: AppColors.primaryColor
           ),
           initialRoute: '/',
           onGenerateRoute: (settings) {
@@ -49,6 +60,7 @@ class MyApp extends StatelessWidget {
                   uri.pathSegments.first == 'shared-chat') {
                 final String? token = uri.queryParameters['token'];
                 if (token != null) {
+                  isLoggedIn =true;
                   return MaterialPageRoute(
                     builder: (context) => SharedChatScreen(token: token),
                   );

@@ -1,3 +1,4 @@
+import 'package:chatbot_text_tool/utils/colors.dart';
 import 'package:chatbot_text_tool/utils/custom_snackbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,93 +22,119 @@ class _SettingsScreenState extends State<SettingsScreen> {
         centerTitle: true,
         elevation: 5,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: <Widget>[
-          FutureBuilder<UserModel?>(
-              future: SessionManager.getUser(),
-              builder: (context, snapshot) {
-                return Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    gradient: LinearGradient(
-                      colors: [Color(0xFFDB91B9), Color(0xFF39D2C0)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.white54,
-                          borderRadius: BorderRadius.all(Radius.circular(40))
-                        ),
-                        height: 80,
-                        width: 80,
-                        child:  const Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            'JD',
-                            style: TextStyle(fontSize: 25.0, color: Colors.white),
+      body: Container(
+        color: AppColors.backgroundColor,
+        child: ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: <Widget>[
+            FutureBuilder<UserModel?>(
+                future: SessionManager.getUser(),
+                builder: (context, snapshot) {
+                  return Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
+                        color: AppColors.primaryColor.withAlpha(50)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          decoration: const BoxDecoration(
+                              color: Colors.white54,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(40))),
+                          height: 80,
+                          width: 80,
+                          child: const Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'JD',
+                              style: TextStyle(
+                                  fontSize: 25.0, color: Colors.black),
+                            ),
                           ),
                         ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(left: 10),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              snapshot.data?.name ?? "N/A",
-                              style: const TextStyle(
-                                  color: Colors.white,
+                        Container(
+                          margin: const EdgeInsets.only(left: 10),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                snapshot.data?.name ?? "N/A",
+                                style: const TextStyle(
+                                  color: Colors.black,
                                   fontSize: 24,
                                   fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            Text(
-                              snapshot.data?.email ?? 'N/A',
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 18),
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                );
-              }),
-          const SizedBox(height: 30,),
-          ListTile(
-            leading: const Icon(Icons.lock),
-            title: const Text('Privacy Policy'),
-            onTap: () {
-              _showPrivacyPolicy(context);
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.lock_reset),
-            title: const Text('Reset Password'),
-            onTap: () {
-              context.showCustomSnackBar('Feature coming soon!');
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.rule_sharp),
-            title: const Text('Terms & Conditions'),
-            onTap: () {
-              context.showCustomSnackBar('Feature coming soon!');
-            },
-          ),
-          const Divider(),
-        ],
+                              Text(
+                                snapshot.data?.email ?? 'N/A',
+                                style: const TextStyle(
+                                    color: Colors.black, fontSize: 18),
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  );
+                }),
+            const SizedBox(
+              height: 30,
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.textFieldBgColor),
+                child: const Icon(Icons.lock),
+              ),
+              title: const Text('Privacy Policy'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                _showPrivacyPolicy(context);
+              },
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.textFieldBgColor),
+                child: const Icon(Icons.lock_reset),
+              ),
+              title: const Text('Reset Password'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                context.showCustomSnackBar('Feature coming soon!');
+              },
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.textFieldBgColor),
+                child: const Icon(Icons.rule_sharp),
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              title: const Text('Terms & Conditions'),
+              onTap: () {
+                context.showCustomSnackBar('Feature coming soon!');
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -28,7 +28,7 @@ class AppLogoHorizontal extends StatelessWidget {
             const Icon(Icons.bug_report,
                 size: 65, color: Colors.white),
             Text(
-              'BotFusion',
+              'FusionBot',
               style: GoogleFonts.playball(
                 color: Colors.white,
                 // You need to set the color to white to apply the gradient

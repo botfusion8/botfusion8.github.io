@@ -47,7 +47,6 @@ class ApiService {
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
       return SlammieBotResponse.fromJson(responseData);
-
     } else {
       throw Exception('Failed to send request: ${response.statusCode}\nResponse: ${response.body}');
     }

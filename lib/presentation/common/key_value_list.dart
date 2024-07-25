@@ -75,7 +75,7 @@ class _KeyValueListState extends State<KeyValueList> {
                   flex: 2,
                   child: TextFormField(
                     controller: keyValuePairs[index].key,
-                    decoration: const InputDecoration(hintText: 'Key'),
+                    decoration: const InputDecoration(hintText: 'Key',border: OutlineInputBorder()),
                     onChanged: (value) => _updateParent(),
                   ),
                 ),
@@ -84,7 +84,7 @@ class _KeyValueListState extends State<KeyValueList> {
                   flex: 3,
                   child: TextFormField(
                     controller: keyValuePairs[index].value,
-                    decoration: const InputDecoration(hintText: 'Value'),
+                    decoration: const InputDecoration(hintText: 'Value',border: OutlineInputBorder()),
                     onChanged: (value) => _updateParent(),
                   ),
                 ),

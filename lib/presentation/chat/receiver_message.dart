@@ -1,7 +1,9 @@
 import 'package:chatbot_text_tool/utils/timestamp_converter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart'; // import the markdown package
+import 'package:flutter_markdown/flutter_markdown.dart';
+
+import '../../utils/colors.dart'; // import the markdown package
 
 class ReceiverMessage extends StatelessWidget {
   final String text;
@@ -18,9 +20,10 @@ class ReceiverMessage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         margin: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: const BorderRadius.only(
+        decoration: const BoxDecoration(
+          // color: Colors.grey[300],
+          color: AppColors.messageBgColor,
+          borderRadius: BorderRadius.only(
               topRight: Radius.circular(8),
               bottomLeft: Radius.circular(8),
               bottomRight: Radius.circular(8)

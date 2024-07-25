@@ -1,4 +1,5 @@
 import 'package:chatbot_text_tool/presentation/share/shared_chat_screen.dart';
+import 'package:chatbot_text_tool/utils/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,7 @@ class ShareHistoryScreen extends StatefulWidget {
   @override
   State<ShareHistoryScreen> createState() => _ShareHistoryScreenState();
 }
+
 
 class _ShareHistoryScreenState extends State<ShareHistoryScreen> {
   @override
@@ -88,7 +90,8 @@ class _sharedHistoryItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.grey[300],
+        // color: Colors.grey[300],
+        color: AppColors.messageBgColor,
         borderRadius: const BorderRadius.all(Radius.circular(8)),
       ),
       child: InkWell(
