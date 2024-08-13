@@ -19,16 +19,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="0; URL=./index.html">
     <script type="text/javascript">
- // Capture the original path and search query
-    var path = window.location.pathname + window.location.search;
-    // Check if the path includes '404.html' to avoid infinite loops
-    if (!path.includes('404.html')) {
-      // Redirect to the root with the path as a query parameter
-      window.location.replace('/?' + 'redirect=' + encodeURIComponent(path));
-    } else {
-      document.write('<p>Page not found. Redirecting...</p>');
-    }
-  </script>
+      // Check if the current URL matches a known path
+      if (location.pathname !== '/' && !location.pathname.startsWith('/index.html')) {
+        // Redirect to the root path
+        location.replace(location.origin + '/?' + location.pathname.substr(1) + location.search);
+      }
+    </script>
+    <script src="main.dart.js"></script>
 </head>
 <body>
 </body>
