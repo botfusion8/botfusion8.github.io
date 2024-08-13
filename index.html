@@ -1,8 +1,7 @@
-<!--
 <!DOCTYPE html>
 <html>
 <head>
-    &lt;!&ndash;
+    <!--
       If you are serving your web app in a path other than the root, change the
       href value below to reflect the base path you are serving from.
 
@@ -13,21 +12,21 @@
       * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
 
       This is a placeholder for base href that will be replaced by the value of
-      the `&#45;&#45;base-href` argument provided to `flutter build`.
-    &ndash;&gt;
+      the `--base-href` argument provided to `flutter build`.
+    -->
     <base href="/">
 
     <meta charset="UTF-8">
     <meta content="IE=Edge" http-equiv="X-UA-Compatible">
     <meta name="description" content="A new Flutter project.">
 
-    &lt;!&ndash; iOS meta tags & icons &ndash;&gt;
+    <!-- iOS meta tags & icons -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="chatbot_text_tool">
     <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-    &lt;!&ndash; Favicon &ndash;&gt;
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="logo.png"/>
 
     <title>chatbot_text_tool</title>
@@ -35,35 +34,14 @@
 </head>
 <body>
 <script src="flutter_bootstrap.js" async></script>
-<script>
-
-window.onload = function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const redirectPath = urlParams.get('redirect');
-  if (redirectPath) {
-    window.history.replaceState(null, null, redirectPath);
-  }
-};
-  </script>
-</body>
-</html>
--->
-
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=." />
-    <script type="text/javascript">
+<script type="text/javascript">
       // Check if the current URL matches a known path
       if (location.pathname !== '/' && !location.pathname.startsWith('/index.html')) {
         // Redirect to the root path
         location.replace(location.origin + '/?' + location.pathname.substr(1) + location.search);
       }
     </script>
-    <script src="main.dart.js"></script>
-</head>
-<body>
-<p>Redirecting...</p>
+<script src="main.dart.js"></script>
 </body>
 </html>
+
