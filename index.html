@@ -59,17 +59,17 @@ window.onload = function() {
       var queryParams = new URLSearchParams(window.location.search);
       var redirect = queryParams.get('redirect');
 
-      // Check if the current path is not the root or index.html
+      // If not at the root or index.html, handle redirection
       if (currentPath !== '/' && !currentPath.startsWith('/index.html')) {
         if (redirect) {
-          // Redirect to the specified path
+          // Redirect to the path specified in 'redirect' parameter
           window.location.href = '/' + encodeURIComponent(redirect);
         } else {
-          // Redirect to root with the current path as a query parameter
+          // Redirect to the root with current path as a query parameter
           window.location.replace('/?redirect=' + encodeURIComponent(currentPath + window.location.search));
         }
       } else {
-        // Load the Flutter application
+        // Load the Flutter app
         var script = document.createElement('script');
         script.src = 'main.dart.js';
         script.onload = function() {
@@ -87,4 +87,5 @@ window.onload = function() {
 <p>Redirecting...</p>
 </body>
 </html>
+
 
