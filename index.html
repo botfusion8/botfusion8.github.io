@@ -51,28 +51,18 @@ window.onload = function() {
 <!DOCTYPE html>
 <html>
 <head>
-    <base href="/">
     <meta charset="UTF-8">
-    <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-    <meta name="description" content="A new Flutter project.">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="chatbot_text_tool">
-    <link rel="apple-touch-icon" href="icons/Icon-192.png">
-    <link rel="icon" type="image/png" href="logo.png"/>
-    <title>chatbot_text_tool</title>
-    <link rel="manifest" href="manifest.json">
+    <meta http-equiv="refresh" content="0; url=." />
+    <script type="text/javascript">
+    var redirect = window.location.href.split('/').slice(3).join('/');
+    if (redirect) {
+      window.location.href = '/' + redirect.split('?')[0] + '?' + (redirect.split('?')[1] || '');
+    } else {
+      window.location.href = '/';
+    }
+  </script>
 </head>
 <body>
-<script src="flutter_bootstrap.js" async></script>
-<script>
-      window.onload = function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const redirectPath = urlParams.get('redirect');
-        if (redirectPath) {
-          window.history.replaceState(null, null, redirectPath);
-        }
-      };
-    </script>
+<p>Redirecting...</p>
 </body>
 </html>
