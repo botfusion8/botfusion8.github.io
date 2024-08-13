@@ -1,3 +1,4 @@
+<!--
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,3 +12,36 @@
 <body>
 </body>
 </html>
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Page Not Found</title>
+    <script type="text/javascript">
+    (function() {
+      // Avoid infinite redirect loop
+      if (window.location.pathname !== '/404.html') {
+        var path = window.location.pathname + window.location.search;
+        // Redirect to the root with the path as a query parameter
+        window.location.replace('/?redirect=' + encodeURIComponent(path));
+      } else {
+        // Display a 404 error message and provide an option to return to the home page
+        document.addEventListener('DOMContentLoaded', function() {
+          var message = document.createElement('p');
+          message.textContent = 'Page not found. Redirecting...';
+          document.body.appendChild(message);
+
+          setTimeout(function() {
+            window.location.href = '/';
+          }, 3000); // Redirect after 3 seconds
+        });
+      }
+    })();
+  </script>
+</head>
+<body>
+<!-- The script will handle the content update -->
+</body>
+</html>
+

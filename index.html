@@ -54,7 +54,6 @@ window.onload = function() {
     <meta charset="UTF-8">
     <title>Your App</title>
     <script type="text/javascript">
-    // Redirect to handle query parameters and avoid direct access to unknown paths
     (function() {
       var currentPath = window.location.pathname;
       var queryParams = new URLSearchParams(window.location.search);
@@ -71,12 +70,21 @@ window.onload = function() {
         }
       } else {
         // Load the Flutter application
-        document.write('<script src="main.dart.js"></script>');
-    }
+        var script = document.createElement('script');
+        script.src = 'main.dart.js';
+        script.onload = function() {
+          console.log('Flutter app loaded.');
+        };
+        script.onerror = function() {
+          console.error('Failed to load Flutter app.');
+        };
+        document.head.appendChild(script);
+      }
     })();
-    </script>
+  </script>
 </head>
 <body>
 <p>Redirecting...</p>
 </body>
 </html>
+
