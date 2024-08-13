@@ -1,7 +1,8 @@
+<!--
 <!DOCTYPE html>
 <html>
 <head>
-    <!--
+    &lt;!&ndash;
       If you are serving your web app in a path other than the root, change the
       href value below to reflect the base path you are serving from.
 
@@ -12,21 +13,21 @@
       * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
 
       This is a placeholder for base href that will be replaced by the value of
-      the `--base-href` argument provided to `flutter build`.
-    -->
+      the `&#45;&#45;base-href` argument provided to `flutter build`.
+    &ndash;&gt;
     <base href="/">
 
     <meta charset="UTF-8">
     <meta content="IE=Edge" http-equiv="X-UA-Compatible">
     <meta name="description" content="A new Flutter project.">
 
-    <!-- iOS meta tags & icons -->
+    &lt;!&ndash; iOS meta tags & icons &ndash;&gt;
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="chatbot_text_tool">
     <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-    <!-- Favicon -->
+    &lt;!&ndash; Favicon &ndash;&gt;
     <link rel="icon" type="image/png" href="logo.png"/>
 
     <title>chatbot_text_tool</title>
@@ -34,14 +35,48 @@
 </head>
 <body>
 <script src="flutter_bootstrap.js" async></script>
-<script type="text/javascript">
-      // Check if the current URL matches a known path
-      if (location.pathname !== '/' && !location.pathname.startsWith('/index.html')) {
-        // Redirect to the root path
-        location.replace(location.origin + '/?' + location.pathname.substr(1) + location.search);
-      }
-    </script>
-<script src="main.dart.js"></script>
+<script>
+
+window.onload = function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirectPath = urlParams.get('redirect');
+  if (redirectPath) {
+    window.history.replaceState(null, null, redirectPath);
+  }
+};
+  </script>
 </body>
 </html>
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Your App</title>
+    <script type="text/javascript">
+    // Redirect to handle query parameters and avoid direct access to unknown paths
+    (function() {
+      var currentPath = window.location.pathname;
+      var queryParams = new URLSearchParams(window.location.search);
+      var redirect = queryParams.get('redirect');
 
+      // Check if the current path is not the root or index.html
+      if (currentPath !== '/' && !currentPath.startsWith('/index.html')) {
+        if (redirect) {
+          // Redirect to the specified path
+          window.location.href = '/' + encodeURIComponent(redirect);
+        } else {
+          // Redirect to root with the current path as a query parameter
+          window.location.replace('/?redirect=' + encodeURIComponent(currentPath + window.location.search));
+        }
+      } else {
+        // Load the Flutter application
+        document.write('<script src="main.dart.js"></script>');
+    }
+    })();
+    </script>
+</head>
+<body>
+<p>Redirecting...</p>
+</body>
+</html>
