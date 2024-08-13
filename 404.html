@@ -26,7 +26,7 @@
         // Redirect to the root with the path as a query parameter
         window.location.replace('/?redirect=' + encodeURIComponent(path));
       } else {
-        // Display a 404 error message and provide an option to return to the home page
+        // Display a 404 error message and redirect after a delay
         document.addEventListener('DOMContentLoaded', function() {
           var message = document.createElement('p');
           message.textContent = 'Page not found. Redirecting...';
@@ -44,4 +44,3 @@
 <!-- The script will handle the content update -->
 </body>
 </html>
-
