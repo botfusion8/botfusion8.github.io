@@ -1,3 +1,4 @@
+<!--
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,3 +12,26 @@
 <body>
 </body>
 </html>
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="0; url=." />
+    <script type="text/javascript">
+     // Capture the original path and search query
+    var path = window.location.pathname + window.location.search;
+    // Check if the path includes '404.html' to avoid infinite loops
+    if (!path.includes('404.html')) {
+      // Redirect to the root with the path as a query parameter
+      window.location.replace('/?' + 'redirect=' + encodeURIComponent(path));
+    } else {
+      document.write('<p>Page not found. Redirecting...</p>');
+    }
+  </script>
+</head>
+<body>
+<p>Redirecting...</p>
+</body>
+</html>
+
