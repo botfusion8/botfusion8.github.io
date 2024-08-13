@@ -1,12 +1,29 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta http-equiv="refresh" content="0; URL=./index.html">-->
+<!--    <script type="text/javascript">-->
+<!--    var path = window.location.pathname;-->
+<!--    window.location.replace("/index.html?redirect=" + path);-->
+<!--  </script>-->
+<!--</head>-->
+<!--<body>-->
+<!--</body>-->
+<!--</html>-->
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="0; URL=./index.html">
     <script type="text/javascript">
-    var path = window.location.pathname;
-    window.location.replace("/index.html?redirect=" + path);
-  </script>
+      var path = window.location.pathname;
+      if (path !== '/') {
+        window.location.replace("/index.html?redirect=" + path);
+      } else {
+        window.location.replace("/index.html");
+      }
+    </script>
 </head>
 <body>
 </body>
