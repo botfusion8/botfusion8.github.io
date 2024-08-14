@@ -60219,98 +60219,101 @@ s=1
 break
 case 1:return A.t(q,r)}})
 return A.u($async$DO,r)},
-i5(){var s=0,r=A.v(t.H),q,p=2,o,n=this,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4
-var $async$i5=A.q(function(a5,a6){if(a5===1){o=a6
+i5(){var s=0,r=A.v(t.H),q,p=2,o,n=this,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5
+var $async$i5=A.q(function(a6,a7){if(a6===1){o=a7
 s=p}while(true)switch(s){case 0:if(n.a.d.length===0){s=1
-break}e=$.H
-d=(e==null?$.H=$.al():e).ad("[DEFAULT]")
-e=$.bu()
-A.aa(d,e,!0)
-c=A.b7(new A.ai(d))
-m=A.cu(c,c.gbJ().ca("workspaces")).d8(n.a.d)
+break}f=$.H
+e=(f==null?$.H=$.al():f).ad("[DEFAULT]")
+f=$.bu()
+A.aa(e,f,!0)
+d=A.b7(new A.ai(e))
+m=A.cu(d,d.gbJ().ca("workspaces")).d8(n.a.d)
 l=null
+d=$.H
+e=(d==null?$.H=$.al():d).ad("[DEFAULT]")
+A.aa(e,f,!0)
+d=A.cC(new A.ai(e))
 c=$.H
-d=(c==null?$.H=$.al():c).ad("[DEFAULT]")
-A.aa(d,e,!0)
-c=A.cC(new A.ai(d))
-b=$.H
-d=(b==null?$.H=$.al():b).ad("[DEFAULT]")
-A.aa(d,e,!0)
-k=new A.d_(c,A.b7(new A.ai(d))).de()
-if(k!=null){c=n.r
-c.toString
-l=new A.fY(c,"editor",!1,k)}p=4
+e=(c==null?$.H=$.al():c).ad("[DEFAULT]")
+A.aa(e,f,!0)
+b=new A.d_(d,A.b7(new A.ai(e))).de()
+if(b!=null){d=n.r
+d.toString
+l=new A.fY(d,"editor",!1,b)}p=4
 s=7
 return A.o(J.aRI(m),$async$i5)
-case 7:j=a6
-s=j.guj()?8:10
+case 7:k=a7
+s=k.guj()?8:10
 break
-case 8:s=J.jq(j)!=null&&J.jq(j).am(0,"users")?11:13
+case 8:s=J.jq(k)!=null&&J.jq(k).am(0,"users")?11:13
 break
-case 11:i=J.jq(j).h(0,"users")
-c=J.eq(i,new A.aDi(),t.bt)
-h=A.a0(c,!0,c.$ti.i("aj.E"))
-c=J.jq(j)
-c=c==null?null:c.h(0,"usersRef")
-t.kc.a(c)
-g=c==null?[]:c
-c=n.r
+case 11:j=J.jq(k).h(0,"users")
+d=J.eq(j,new A.aDi(),t.bt)
+i=A.a0(d,!0,d.$ti.i("aj.E"))
+d=J.jq(k)
+d=d==null?null:d.h(0,"usersRef")
+t.kc.a(d)
+h=d==null?[]:d
+d=n.r
+d.toString
+J.ds(h,d)
+s=!J.aMh(i,new A.aDj(n))?14:16
+break
+case 14:if(l!=null)J.ds(i,l)
+d=i
+c=A.a_(d).i("Z<1,am<k,@>>")
+c=A.a3(["users",A.a0(new A.Z(d,new A.aDk(),c),!0,c.i("aj.E")),"usersRef",h],t.K,t.X)
+d=m.a
+c=A.ji(c)
 c.toString
-J.ds(g,c)
-s=!J.aMh(h,new A.aDj(n))?14:16
-break
-case 14:if(l!=null)J.ds(h,l)
-c=h
-b=A.a_(c).i("Z<1,am<k,@>>")
-b=A.a3(["users",A.a0(new A.Z(c,new A.aDk(),b),!0,b.i("aj.E")),"usersRef",g],t.K,t.X)
-c=m.a
-b=A.ji(b)
-b.toString
 s=17
-return A.o(c.b_(0,b),$async$i5)
-case 17:if(k!=null){c=$.H
-d=(c==null?$.H=$.al():c).ad("[DEFAULT]")
-A.aa(d,e,!0)
-c=A.cC(new A.ai(d))
-b=$.H
-d=(b==null?$.H=$.al():b).ad("[DEFAULT]")
-A.aa(d,e,!0)
-c=new A.d_(c,A.b7(new A.ai(d))).de()
-b=n.a.e
-a=Date.now()
+return A.o(d.b_(0,c),$async$i5)
+case 17:d=l
+if((d==null?null:d.a)!=null){d=n.r
+d.toString
+c=$.H
+e=(c==null?$.H=$.al():c).ad("[DEFAULT]")
+A.aa(e,f,!0)
+c=A.cC(new A.ai(e))
+a=$.H
+e=(a==null?$.H=$.al():a).ad("[DEFAULT]")
+A.aa(e,f,!0)
+c=new A.d_(c,A.b7(new A.ai(e))).de()
+a=n.a.e
 a0=Date.now()
-a1=$.H
-d=(a1==null?$.H=$.al():a1).ad("[DEFAULT]")
-A.aa(d,e,!0)
-e=A.b7(new A.ai(d))
-e=A.cu(e,e.gbJ().ca("notifications"))
-a2=A.a3(["workspaceRef",b,"status",!1,"createdAt",A.hl(1000*a),"updatedAt",A.hl(1000*a0),"notificationType","collaboration","message",u.J,"guestUser",!1],t.N,t.z)
-if(c!=null)a2.m(0,"sendBy",c)
-a2.m(0,"sendTo",k)
-e.C(0,a2)
-e=n.c.a1(t.q)
-e.toString
-e.f.dK(A.dV(null,null,null,null,null,B.A,null,A.b0("Invitation sent successfully",null,null,null,null,null,null),null,B.ai,null,null,null,null,null,null,null,null,null))
-e=n.c
-e.toString
-A.cY(e,!1).iu(0,null)}s=15
+a1=Date.now()
+a2=$.H
+e=(a2==null?$.H=$.al():a2).ad("[DEFAULT]")
+A.aa(e,f,!0)
+f=A.b7(new A.ai(e))
+f=A.cu(f,f.gbJ().ca("notifications"))
+a3=A.a3(["workspaceRef",a,"status",!1,"createdAt",A.hl(1000*a0),"updatedAt",A.hl(1000*a1),"notificationType","collaboration","message",u.J,"guestUser",!1],t.N,t.z)
+if(c!=null)a3.m(0,"sendBy",c)
+a3.m(0,"sendTo",d)
+f.C(0,a3)
+f=n.c.a1(t.q)
+f.toString
+f.f.dK(A.dV(null,null,null,null,null,B.A,null,A.b0("Invitation sent successfully",null,null,null,null,null,null),null,B.ai,null,null,null,null,null,null,null,null,null))
+f=n.c
+f.toString
+A.cY(f,!1).iu(0,null)}s=15
 break
-case 16:e=n.c.a1(t.q)
-e.toString
-e.f.dK(A.dV(null,null,null,null,null,B.A,null,A.b0("User already exists in the collaboration",null,null,null,null,null,null),null,B.ai,null,null,null,null,null,null,null,null,null))
+case 16:f=n.c.a1(t.q)
+f.toString
+f.f.dK(A.dV(null,null,null,null,null,B.A,null,A.b0("User already exists in the collaboration",null,null,null,null,null,null),null,B.ai,null,null,null,null,null,null,null,null,null))
 case 15:s=12
 break
 case 13:s=l!=null?18:19
 break
-case 18:e=A.a3(["users",A.a([l.j0()],t.H7)],t.K,t.X)
-c=m.a
-e=A.ji(e)
-e.toString
+case 18:f=A.a3(["users",A.a([l.j0()],t.H7)],t.K,t.X)
+d=m.a
+f=A.ji(f)
+f.toString
 s=20
-return A.o(c.b_(0,e),$async$i5)
-case 20:case 19:e=n.c
-e.toString
-A.cY(e,!1).iu(0,null)
+return A.o(d.b_(0,f),$async$i5)
+case 20:case 19:f=n.c
+f.toString
+A.cY(f,!1).iu(0,null)
 case 12:s=9
 break
 case 10:A.fI("Document does not exist.")
@@ -60318,9 +60321,9 @@ case 9:p=2
 s=6
 break
 case 4:p=3
-a4=o
-f=A.a7(a4)
-A.fI("Failed to update document: "+A.f(f))
+a5=o
+g=A.a7(a5)
+A.fI("Failed to update document: "+A.f(g))
 s=6
 break
 case 3:s=2
